@@ -1,0 +1,2217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Publisher Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e74c3c;
+      --success-color: #27ae60;
+      --warning-color: #f39c12;
+      --light-bg: #ecf0f1;
+      --dark-text: #2c3e50;
+      --light-text: #7f8c8d;
+      --border-light: #bdc3c7;
+      --hover-bg: #f8f9fa;
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+      --transition-speed: 0.3s;
+      --white: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      outline: none !important;
+    }
+
+    *:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    input:focus,
+    select:focus,
+    button:focus,
+    textarea:focus {
+      outline: none !important;
+      box-shadow: none !important;
+      border-color: inherit !important;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--light-bg) 0%, #f5f9ff 100%);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      color: var(--dark-text);
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .panel {
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      flex: 1;
+      min-width: 300px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .panel:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .left-panel {
+      flex: 2;
+    }
+
+    .right-panel {
+      flex: 1;
+    }
+
+
+    .dashboard-wrapper {
+      max-width: 1400px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, var(--light-bg) 0%, #f8f9fa 100%);
+      padding: 12px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+      color: #4f46e5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .page-header .subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Content Area */
+    .dashboard-content {
+      display: grid;
+      grid-template-columns: 60fr 40fr;
+      gap: 20px;
+      padding: 12px;
+      min-height: 500px;
+      background: #fafbfc;
+    }
+
+    /* Left Panel */
+    .left-panel {
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Right Sidebar */
+    .right-sidebar {
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+
+    /* Section Headers */
+    .section-header {
+      margin-bottom: 10px;
+      position: relative;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--light-bg);
+    }
+
+    .section-header h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .section-header h2 i {
+      color: var(--secondary-color);
+      font-size: 0.9rem;
+    }
+
+    /* Filter Section */
+    .filter-section {
+      background: #eef1f2;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      animation: slideDown 0.4s ease-out;
+    }
+
+    .filter-controls {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-controls .form-select {
+      flex: 1;
+      min-width: 180px;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 8px 12px;
+      transition: all var(--transition-speed);
+      background: white;
+      font-size: 0.9rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+
+    .btn-primary-custom {
+      background: var(--secondary-color);
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all var(--transition-speed);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary-custom:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Email List */
+    .email-list-container {
+      max-height: 350px;
+      overflow-y: auto;
+      
+      border-radius: 12px;
+      background: #eef1f2 ;
+      padding: 10px;
+    }
+
+    .email-list-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .email-list-container::-webkit-scrollbar-track {
+      background: var(--light-bg);
+      border-radius: 10px;
+    }
+
+    .email-list-container::-webkit-scrollbar-thumb {
+      background: var(--border-light);
+      border-radius: 10px;
+      transition: background var(--transition-speed);
+    }
+
+    .email-list-container::-webkit-scrollbar-thumb:hover {
+      background: var(--light-text);
+    }
+
+    .email-item {
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      background: white;
+      transition: all var(--transition-speed);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease-out;
+      font-size: 0.9rem;
+    }
+
+    .email-item:hover {
+      background: var(--hover-bg);
+      transform: translateX(5px);
+    }
+
+    .email-item.selected {
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      border-left: 3px solid var(--secondary-color);
+    }
+
+    .email-item.published {
+      background: linear-gradient(135deg, #10b98115 0%, #059669 15 100%);
+      border-left: 3px solid #10b981;
+      opacity: 0.7;
+    }
+
+    .email-item.published .email-checkbox {
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .email-item.published {
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .email-item.published .republish-toggle {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .email-item.published .email-name {
+      text-decoration: line-through;
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .republish-toggle {
+      background: none;
+      border: 1px solid #10b981;
+      color: #10b981;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .republish-toggle:hover {
+      background: #10b981;
+      color: white;
+    }
+
+    .republish-toggle.active {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: white;
+    }
+
+    .republish-toggle.active:hover {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+
+    .email-checkbox {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      transition: transform var(--transition-speed);
+    }
+
+    .email-checkbox:checked {
+      transform: scale(1.1);
+    }
+
+    .email-details {
+      flex: 1;
+    }
+
+    .email-name {
+      font-weight: 500;
+      color: var(--dark-text);
+      margin-bottom: 4px;
+    }
+
+    .email-id {
+      font-size: 0.875rem;
+      color: var(--light-text);
+    }
+
+    .email-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      background: var(--secondary-color);
+      color: white;
+      font-weight: 500;
+    }
+
+    /* Selected Emails Panel */
+    .selected-panel {
+      background: #eef1f2;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .selected-count {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      font-size: 0.85rem;
+    }
+
+    .selected-count span {
+      font-weight: 500;
+      color: var(--dark-text);
+      font-size: 0.875rem;
+    }
+
+    .selected-list {
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .selected-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 8px;
+      margin-bottom: 3px;
+      background: white;
+      border-radius: 4px;
+      animation: slideIn 0.3s ease-out;
+      font-size: 0.8rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .remove-btn {
+      background: transparent;
+      border: none;
+      color: var(--accent-color);
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: transform var(--transition-speed);
+      min-width: 20px;
+      min-height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      z-index: 10;
+      position: relative;
+    }
+
+    .remove-btn:hover {
+      transform: rotate(90deg);
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 50%;
+    }
+
+    /* Form Controls */
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: var(--dark-text);
+      font-size: 0.85rem;
+    }
+
+    .form-control-custom {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      transition: all var(--transition-speed);
+      font-size: 0.9rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+
+    .form-text {
+      font-size: 0.875rem;
+      color: var(--light-text);
+      margin-top: 5px;
+    }
+
+    /* Publish Button */
+    .btn-publish {
+      width: 100%;
+      padding: 12px;
+      background: var(--secondary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-speed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .btn-publish:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-publish:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Results Section - Overlay Style */
+    .results-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .results-container {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 70vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.4s ease-out;
+      position: relative;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--light-bg);
+    }
+
+    .results-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--light-text);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .results-close:hover {
+      color: var(--accent-color);
+    }
+
+    .result-item {
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .result-item.success {
+      background: rgba(39, 174, 96, 0.1);
+      border-left: 3px solid var(--success-color);
+    }
+
+    .result-item.error {
+      background: rgba(231, 76, 60, 0.1);
+      border-left: 3px solid var(--accent-color);
+    }
+
+    .result-item.processing {
+      background: rgba(52, 152, 219, 0.1);
+      border-left: 3px solid var(--secondary-color);
+    }
+
+    /* Loading Spinner */
+    .spinner-border-sm {
+      width: 1rem;
+      height: 1rem;
+      border-width: 2px;
+    }
+
+    /* Stats Cards */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: #eef1f2;
+      padding: 10px 8px;
+      border-radius: 8px;
+      text-align: center;
+      transition: all var(--transition-speed);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 2px;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      color: var(--light-text);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideRight {
+      from {
+        width: 0;
+      }
+
+      to {
+        width: 60px;
+      }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: rotate(0deg);
+      }
+
+      50% {
+        transform: rotate(180deg);
+      }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .dashboard-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
+      }
+
+      .right-sidebar {
+        position: static;
+        margin-top: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-wrapper {
+        margin: 10px;
+        border-radius: 8px;
+      }
+
+      .page-header {
+        padding: 20px;
+      }
+
+      .page-header h1 {
+        font-size: 1.5rem;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .dashboard-content {
+        padding: 15px;
+        gap: 15px;
+      }
+
+      .left-panel,
+      .right-sidebar {
+        padding: 20px;
+        border-radius: 8px;
+      }
+
+      .stats-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .stat-card {
+        padding: 20px 15px;
+      }
+
+      .stat-value {
+        font-size: 1.8rem;
+      }
+
+      .filter-section {
+        padding: 20px;
+      }
+
+      .filter-controls {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .filter-controls .form-select,
+      .filter-controls .btn-primary-custom {
+        width: 100%;
+        min-width: unset;
+      }
+
+      .email-list-container {
+        max-height: 350px;
+        padding: 10px;
+      }
+
+      .email-item {
+        padding: 12px;
+        margin-bottom: 8px;
+      }
+
+      .selected-panel {
+        padding: 15px;
+      }
+
+      .selected-list {
+        max-height: 150px;
+      }
+
+      .btn-publish {
+        padding: 12px;
+        font-size: 1rem;
+      }
+
+      .section-header h2 {
+        font-size: 1.1rem;
+      }
+
+      .form-control-custom {
+        font-size: 16px;
+        /* Prevent zoom on iOS */
+      }
+    }
+
+    @media (max-width: 480px) {
+      .dashboard-wrapper {
+        margin: 5px;
+        box-shadow: none;
+      }
+
+      .page-header {
+        padding: 15px;
+      }
+
+      .page-header h1 {
+        font-size: 1.2rem;
+      }
+
+      .page-header h1 i {
+        font-size: 1.5rem;
+      }
+
+      .dashboard-content {
+        padding: 10px;
+        background: transparent;
+      }
+
+      .left-panel,
+      .right-sidebar {
+        padding: 15px;
+        margin-bottom: 10px;
+      }
+
+      .stats-row {
+        gap: 10px;
+      }
+
+      .stat-card {
+        padding: 15px 10px;
+        border-radius: 8px;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+      }
+
+      .stat-label {
+        font-size: 0.8rem;
+      }
+
+      .filter-section {
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .email-list-container {
+        max-height: 300px;
+        border-width: 1px;
+      }
+
+      .email-item {
+        padding: 10px;
+        gap: 10px;
+      }
+
+      .email-checkbox {
+        width: 18px;
+        height: 18px;
+      }
+
+      .email-name {
+        font-size: 0.9rem;
+      }
+
+      .email-id {
+        font-size: 0.8rem;
+      }
+
+      .email-badge {
+        padding: 3px 8px;
+        font-size: 0.7rem;
+      }
+
+      .selected-panel {
+        padding: 12px;
+        margin-bottom: 20px;
+      }
+
+      .selected-count {
+        padding: 8px;
+        font-size: 0.9rem;
+      }
+
+      .selected-item {
+        padding: 8px;
+        font-size: 0.85rem;
+      }
+
+      .remove-btn {
+        font-size: 1rem;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+      }
+
+      .form-control-custom {
+        padding: 10px 12px;
+        font-size: 16px;
+        /* Prevent zoom on iOS */
+      }
+
+      .form-text {
+        font-size: 0.8rem;
+      }
+
+      .btn-publish {
+        padding: 10px;
+        font-size: 0.95rem;
+        border-radius: 8px;
+      }
+
+      .section-header {
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+      }
+
+      .section-header h2 {
+        font-size: 1rem;
+        gap: 8px;
+      }
+
+      .section-header h2 i {
+        font-size: 0.9rem;
+      }
+
+      .results-container {
+        padding: 15px;
+        margin-top: 20px;
+      }
+
+      .result-item {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Enhanced interactions for email publisher */
+    .email-item {
+      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .email-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.1), transparent);
+      transition: left 0.4s;
+    }
+
+    .email-item:hover::before {
+      left: 100%;
+    }
+
+    .email-item:active {
+      transform: scale(0.98);
+      background: rgba(52, 152, 219, 0.05);
+    }
+
+    .btn-primary-custom {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary-custom::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s;
+    }
+
+    .btn-primary-custom:active::after {
+      width: 200px;
+      height: 200px;
+    }
+
+    .stat-card {
+      transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .stat-card:active {
+      transform: scale(0.98);
+    }
+
+    .selected-item {
+      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .selected-item:hover {
+      transform: translateX(5px);
+      background: rgba(52, 152, 219, 0.05);
+    }
+
+    .remove-btn {
+      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .remove-btn:hover {
+      transform: rotate(90deg) scale(1.1);
+    }
+
+
+    .btn-publish {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-publish::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.6s;
+    }
+
+    .btn-publish:hover::before {
+      left: 100%;
+    }
+
+    .result-item {
+      animation: resultSlideIn 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    @keyframes resultSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Touch-friendly adjustments */
+    @media (hover: none) and (pointer: coarse) {
+
+      .email-checkbox,
+      .form-check-input {
+        width: 24px;
+        height: 24px;
+      }
+
+      .btn-primary-custom,
+      .btn-publish {
+        min-height: 44px;
+      }
+
+      .form-select,
+      .form-control-custom {
+        min-height: 44px;
+      }
+
+      .email-item {
+        min-height: 60px;
+      }
+
+      .remove-btn {
+        min-width: 32px;
+        min-height: 32px;
+      }
+    }
+
+    /* Landscape mode for mobile */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .page-header {
+        padding: 15px;
+      }
+
+      .page-header h1 {
+        font-size: 1.3rem;
+      }
+
+      .stats-row {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .email-list-container {
+        max-height: 250px;
+      }
+
+      .dashboard-content {
+        grid-template-columns: 60fr 40fr;
+      }
+
+      .email-ids-list {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      }
+    }
+
+    /* Email ID Card Styles */
+    .email-ids-container {
+      min-height: 120px;
+      max-height: 280px;
+      border-radius: 8px;
+      padding: 12px;
+      background: #eef1f2;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      overflow-y: auto;
+    }
+
+    .email-ids-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+      min-height: 60px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .email-id-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+      border: 1px solid #4f46e5;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #4f46e5;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s;
+      cursor: pointer;
+      min-height: 36px;
+      word-break: break-all;
+    }
+
+    .email-id-card:hover {
+      transform: translateY(-1px);
+      border-color: #6366f1;
+      background: #f8fafc;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .email-id-card:active {
+      transform: scale(0.98);
+    }
+
+    .remove-email-btn {
+      color: #ef4444;
+      background: none;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    .remove-email-btn:hover {
+      opacity: 1;
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .email-ids-empty {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      font-size: 0.875rem;
+      padding: 30px 0;
+      text-align: center;
+    }
+
+    .email-ids-footer {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #d1d5db;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Utility Classes */
+    .mt-3 {
+      margin-top: 1rem;
+    }
+
+    .mb-3 {
+      margin-bottom: 1rem;
+    }
+
+    .text-muted {
+      color: var(--light-text);
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .d-none {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="email-publisher-container">
+    <div class="dashboard-wrapper">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1><i class="fas fa-paper-plane"></i> Email Publisher Dashboard</h1>
+      </div>
+
+      <!-- Main Content -->
+      <div class="dashboard-content">
+        <!-- Left Panel -->
+        <div class="left-panel">
+          <!-- Statistics -->
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-value" id="totalEmails">0</div>
+              <div class="stat-label">Total Emails</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="selectedCount">0</div>
+              <div class="stat-label">Selected</div>
+            </div>
+            <div class="stat-card" title="Click to clear published history" style="cursor: pointer;" id="publishedCard">
+              <div class="stat-value" id="publishedCount">0</div>
+              <div class="stat-label">Published</div>
+            </div>
+          </div>
+
+          <!-- Filter Section -->
+
+          <div class="filter-section">
+            <div class="filter-controls">
+              <select class="form-select" id="dateFilter">
+                <option value="today">Today</option>
+                <option value="t1">T+1</option>
+                <option value="t2">T+2</option>
+                <option value="t3">T+3</option>
+                <option value="t4">T+4</option>
+              </select>
+              <button class="btn-primary-custom" id="loadEmailsBtn">
+                <i class="bi bi-arrow-clockwise"></i> Load Emails
+              </button>
+            </div>
+            <div class="mt-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="selectAll">
+                <label class="form-check-label" for="selectAll">
+                  Select All Emails
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email List -->
+
+          <div class="email-list-container" id="emailList">
+            <div class="text-center text-muted" style="padding: 40px;">
+              <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+              <p class="mt-3">No emails loaded. Please select a date filter and load emails.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+          <!-- Selected Emails -->
+
+          <div class="selected-panel">
+            <div class="selected-count">
+              <span>Selected Emails</span>
+              <span class="badge bg-primary" id="selectedBadge">0</span>
+            </div>
+            <div class="selected-list" id="selectedEmailsList">
+              <div class="text-center text-muted">
+                No emails selected
+              </div>
+            </div>
+          </div>
+
+          <!-- Publishing Options -->
+
+          <div class="form-group">
+            <label class="form-label" for="emailIdsInput">
+              <i class="bi bi-list-ul"></i> Email IDs
+            </label>
+            <input type="number" class="form-control-custom" id="emailIdsInput"
+              placeholder="Enter email ID and press Enter to add..." style="background-color: #f8f9fa; cursor: text;margin-bottom: 12px;">
+
+            <!-- Email IDs Display Area -->
+            <div class="email-ids-container" id="emailIdsContainer">
+              <div class="email-ids-list" id="emailIdsList">
+                <div class="email-ids-empty" id="emptyState">
+                  <i class="bi bi-inbox" style="margin-right: 8px;"></i>
+                  No email IDs added yet. Type an ID and press Enter to add.
+                </div>
+              </div>
+              <div class="email-ids-footer">
+                <div style="font-size: 0.875rem; font-weight: 500; color: #4f46e5;">
+                  <i class="bi bi-envelope" style="margin-right: 4px;"></i>
+                  <span id="emailCount">0</span> email IDs added
+                </div>
+                <button type="button" id="clearAllBtn" style="display: none; color: #ef4444; background: none; border: none; font-size: 0.875rem; font-weight: 500; cursor: pointer;">
+                  <i class="bi bi-trash" style="margin-right: 4px;"></i>
+                  Clear All
+                </button>
+              </div>
+            </div>
+
+            <small class="form-text">Add IDs manually or they will be auto-populated from selection</small>
+          </div>
+
+
+          <!-- Publish Button -->
+          <button class="btn-publish" id="publishBtn">
+            <i class="bi bi-send"></i> Publish Campaign
+          </button>
+
+          <!-- Results Overlay -->
+          <div class="results-overlay d-none" id="resultsOverlay">
+            <div class="results-container">
+              <div class="results-header">
+                <h3 style="margin: 0; font-size: 1.2rem; color: var(--primary-color);"><i class="bi bi-check-circle"></i> Publishing Results</h3>
+                <button class="results-close" id="closeResults">&times;</button>
+              </div>
+              <div id="resultsList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Helper to format date to YYYY-MM-DD (for comparison)
+    function formatDate(date) {
+      const d = new Date(date);
+      return d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
+    }
+
+    // Robust extractDateFromEmailName
+    function extractDateFromEmailName(name) {
+      if (!name) return null;
+      const dateFormats = [
+        // Match "11 Sep 2025" or "1 Sep 2025"
+        {
+          regex: /(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})/, handler: (match) => {
+            const months = { 'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5, 'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11 };
+            const monthNum = months[match[2]];
+            if (monthNum !== undefined) {
+              const year = parseInt(match[3]);
+              const month = monthNum;
+              const day = parseInt(match[1]);
+              const date = new Date(year, month, day, 12, 0, 0);
+              return date;
+            }
+            return null;
+          }
+        },
+        // Match "Sep 11 2025" or "Sep 1 2025"
+        {
+          regex: /([A-Za-z]{3})\s+(\d{1,2})\s+(\d{4})/, handler: (match) => {
+            const months = { 'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5, 'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11 };
+            const monthNum = months[match[1]];
+            if (monthNum !== undefined) {
+              const year = parseInt(match[3]);
+              const month = monthNum;
+              const day = parseInt(match[2]);
+              const date = new Date(year, month, day, 12, 0, 0);
+              return date;
+            }
+            return null;
+          }
+        },
+        // Match "11/09/2025" or "9/11/2025"
+        {
+          regex: /(\d{1,2})\/(\d{1,2})\/(\d{4})/, handler: (match) => {
+            const year = parseInt(match[3]);
+            const month = parseInt(match[2]) - 1;
+            const day = parseInt(match[1]);
+            return new Date(year, month, day, 12, 0, 0);
+          }
+        },
+        // Match "2025-09-11"
+        {
+          regex: /(\d{4})-(\d{1,2})-(\d{1,2})/, handler: (match) => {
+            const year = parseInt(match[1]);
+            const month = parseInt(match[2]) - 1;
+            const day = parseInt(match[3]);
+            return new Date(year, month, day, 12, 0, 0);
+          }
+        }
+      ];
+      for (const format of dateFormats) {
+        const match = name.match(format.regex);
+        if (match) {
+          const date = format.handler(match);
+          if (date && !isNaN(date.getTime())) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          }
+        }
+      }
+      return null;
+    }
+
+    // Mock data for demonstration
+    const mockEmails = [
+      { clonedEmailId: "EM001", clonedEmailName: "Newsletter 15 Sep 2023", name: "Newsletter 15 Sep 2023", scheduledTime: "2023-09-15T12:00:00Z" },
+      { clonedEmailId: "EM002", clonedEmailName: "Promotion 16 Sep 2023", name: "Promotion 16 Sep 2023", scheduledTime: "2023-09-16T12:00:00Z" },
+      { clonedEmailId: "EM003", clonedEmailName: "Update 17 Sep 2023", name: "Update 17 Sep 2023", scheduledTime: "2023-09-17T12:00:00Z" },
+      { clonedEmailId: "EM004", clonedEmailName: "Weekly Digest 18 Sep 2023", name: "Weekly Digest 18 Sep 2023", scheduledTime: "2023-09-18T12:00:00Z" },
+      { clonedEmailId: "EM005", clonedEmailName: "Special Offer 19 Sep 2023", name: "Special Offer 19 Sep 2023", scheduledTime: "2023-09-19T12:00:00Z" }
+    ];
+
+    // Store the current email data
+    let currentEmails = [];
+    let selectedEmailIds = new Set();
+    let manualEmailIds = [];
+    let publishedEmailIds = new Set(); // Track published emails
+    let currentFilter = 'today'; // Track current filter
+
+    // Function to get published count for current filter
+    function getFilterSpecificPublishedCount() {
+      if (currentEmails.length === 0) return 0;
+
+      // Count how many emails in current list are published
+      return currentEmails.filter(email =>
+        publishedEmailIds.has(email.clonedEmailId)
+      ).length;
+    }
+
+    // Function to update all counts
+    function updateCounts() {
+      document.getElementById('totalEmails').textContent = currentEmails.length;
+      document.getElementById('selectedCount').textContent = selectedEmailIds.size;
+
+      const publishedCount = getFilterSpecificPublishedCount();
+      document.getElementById('publishedCount').textContent = publishedCount;
+
+      // Update the label to show it's filter-specific
+      const publishedLabel = document.querySelector('#publishedCard .stat-label');
+      if (publishedLabel) {
+        const filterText = currentFilter.toUpperCase();
+        publishedLabel.textContent = `Published (${filterText})`;
+      }
+    }
+
+    // Email ID management functions
+    function updateEmailIdsDisplay() {
+      const emailIdsList = document.getElementById('emailIdsList');
+      const clearAllBtn = document.getElementById('clearAllBtn');
+      const emailCount = document.getElementById('emailCount');
+
+      // Check if elements exist
+      if (!emailIdsList || !clearAllBtn || !emailCount) {
+        console.warn('Required elements not found for updateEmailIdsDisplay');
+        return;
+      }
+
+      emailIdsList.innerHTML = '';
+
+      // Combine manual IDs and selected IDs for display
+      const allIds = [...manualEmailIds, ...Array.from(selectedEmailIds)];
+
+      if (allIds.length === 0) {
+        // Always create empty state when no IDs
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'email-ids-empty';
+        emptyDiv.innerHTML = `
+          <i class="bi bi-inbox" style="margin-right: 8px;"></i>
+          No email IDs added yet. Type an ID and press Enter to add.
+        `;
+        emailIdsList.appendChild(emptyDiv);
+        clearAllBtn.style.display = 'none';
+      } else {
+        clearAllBtn.style.display = 'block';
+
+        // Display manual IDs
+        manualEmailIds.forEach((emailId, index) => {
+          const card = document.createElement('div');
+          card.className = 'email-id-card';
+          card.innerHTML = `
+            <span>${emailId}</span>
+            <button type="button" class="remove-email-btn" data-index="${index}" data-type="manual">
+              <i class="bi bi-x"></i>
+            </button>
+          `;
+          emailIdsList.appendChild(card);
+        });
+
+        // Display selected IDs
+        Array.from(selectedEmailIds).forEach((emailId) => {
+          const card = document.createElement('div');
+          card.className = 'email-id-card';
+          card.style.borderColor = '#10b981'; // Green border for selected emails
+          card.style.color = '#10b981';
+          card.innerHTML = `
+            <span>${emailId}</span>
+            <button type="button" class="remove-email-btn" data-id="${emailId}" data-type="selected">
+              <i class="bi bi-x"></i>
+            </button>
+          `;
+          emailIdsList.appendChild(card);
+        });
+
+        // Add event listeners to remove buttons
+        document.querySelectorAll('.remove-email-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const type = this.getAttribute('data-type');
+            if (type === 'manual') {
+              const index = parseInt(this.getAttribute('data-index'));
+              manualEmailIds.splice(index, 1);
+            } else if (type === 'selected') {
+              const emailId = this.getAttribute('data-id');
+              selectedEmailIds.delete(emailId);
+              // Also uncheck the checkbox in the email list
+              const checkbox = document.querySelector(`.email-item input[value="${emailId}"]`);
+              if (checkbox) {
+                checkbox.checked = false;
+              }
+              updateSelectedEmails();
+              updateSelectAllCheckbox();
+            }
+            updateEmailIdsDisplay();
+            updateEmailIdsInput();
+          });
+        });
+      }
+
+      emailCount.textContent = allIds.length;
+      updateEmailIdsInput();
+    }
+
+    function updateEmailIdsInput() {
+      const emailIdsInput = document.querySelector('#emailIdsInput');
+      if (!emailIdsInput) {
+        console.warn('Email IDs input field not found');
+        return;
+      }
+      // Don't update the input field - keep it empty for new entries
+      // The actual IDs are tracked in manualEmailIds and selectedEmailIds arrays
+      emailIdsInput.value = '';
+
+      // Log for debugging
+      const allIds = [...manualEmailIds, ...Array.from(selectedEmailIds)];
+      console.log('Current email IDs:', allIds);
+    }
+
+    function addEmailId(emailId) {
+      const trimmedId = emailId.trim();
+      if (trimmedId) {
+        if (manualEmailIds.includes(trimmedId) || selectedEmailIds.has(trimmedId)) {
+          // Show duplicate warning
+          showDuplicateWarning(trimmedId);
+          return;
+        }
+        manualEmailIds.push(trimmedId);
+        updateEmailIdsDisplay();
+      }
+    }
+
+    function showDuplicateWarning(emailId) {
+      const emailIdsInput = document.getElementById('emailIdsInput');
+      emailIdsInput.style.borderColor = '#ef4444';
+      emailIdsInput.style.backgroundColor = '#fef2f2';
+      emailIdsInput.placeholder = `"${emailId}" already exists!`;
+
+      setTimeout(() => {
+        emailIdsInput.style.borderColor = '';
+        emailIdsInput.style.backgroundColor = '';
+        emailIdsInput.placeholder = 'Enter email ID and press Enter to add...';
+      }, 2000);
+    }
+
+    // Function to update the selected emails display
+    function updateSelectedEmails() {
+      const selectedEmailsContainer = document.getElementById('selectedEmailsList');
+      const selectedBadge = document.getElementById('selectedBadge');
+      const selectedCount = document.getElementById('selectedCount');
+
+      // Clear the current display
+      selectedEmailsContainer.innerHTML = '';
+
+      if (selectedEmailIds.size === 0) {
+        selectedEmailsContainer.innerHTML = '<div class="text-center text-muted">No emails selected</div>';
+        selectedBadge.textContent = '0';
+        selectedCount.textContent = '0';
+        return;
+      }
+
+      // Create elements for each selected email
+      selectedEmailIds.forEach(emailId => {
+        const email = currentEmails.find(e => e.clonedEmailId === emailId);
+        const emailDiv = document.createElement('div');
+        emailDiv.className = 'selected-item';
+        emailDiv.innerHTML = `
+          <span>${email ? email.clonedEmailName : emailId}</span>
+          <button class="remove-btn" data-id="${emailId}">×</button>
+        `;
+        selectedEmailsContainer.appendChild(emailDiv);
+      });
+
+      // Update badge and count
+      selectedBadge.textContent = selectedEmailIds.size;
+      selectedCount.textContent = selectedEmailIds.size;
+      document.getElementById('selectedCount').textContent = selectedEmailIds.size;
+
+      // Add event listeners to remove buttons
+      document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const idToRemove = this.getAttribute('data-id');
+          selectedEmailIds.delete(idToRemove);
+
+          // Also uncheck the checkbox in the email list
+          const checkbox = document.querySelector(`.email-item input[value="${idToRemove}"]`);
+          if (checkbox) {
+            checkbox.checked = false;
+          }
+
+          updateSelectedEmails();
+          updateSelectAllCheckbox();
+          updateEmailIdsDisplay(); // Update the cards display
+          updateEmailIdsInput(); // Update the input field
+        });
+      });
+    }
+
+    // Function to update the select all checkbox state
+    function updateSelectAllCheckbox() {
+      const selectAllCheckbox = document.getElementById('selectAll');
+      const emailCheckboxes = document.querySelectorAll('.email-item input[type="checkbox"]');
+
+      // Only consider non-disabled and non-published checkboxes
+      const selectableCheckboxes = Array.from(emailCheckboxes).filter(checkbox =>
+        !checkbox.disabled && !publishedEmailIds.has(checkbox.value)
+      );
+
+      if (selectableCheckboxes.length === 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.disabled = true;
+        return;
+      }
+
+      selectAllCheckbox.disabled = false;
+
+      const allChecked = selectableCheckboxes.every(checkbox => checkbox.checked);
+      const someChecked = selectableCheckboxes.some(checkbox => checkbox.checked);
+
+      selectAllCheckbox.checked = allChecked;
+      selectAllCheckbox.indeterminate = someChecked && !allChecked;
+    }
+
+    // Load emails based on selected filter
+    document.getElementById('loadEmailsBtn').addEventListener('click', async function () {
+      const totalEmails = document.getElementById('totalEmails');
+      const emailList = document.getElementById('emailList');
+      totalEmails.textContent = `0`;
+      emailList.innerHTML = '<div class="text-center text-muted">Loading emails...</div>';
+
+      const filter = document.getElementById('dateFilter').value;
+      currentFilter = filter; // Update current filter
+
+      // Calculate the target date string (YYYY-MM-DD) for the filter
+      const today = new Date();
+      let offset = 0;
+      if (filter === 'today') offset = 0;
+      else if (filter === 't1') offset = 1;
+      else if (filter === 't2') offset = 2;
+      else if (filter === 't3') offset = 3;
+      else if (filter === 't4') offset = 4;
+
+      // Set time to noon to avoid timezone issues
+      const targetDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset, 12, 0, 0);
+      const targetDateStr = formatDate(targetDate);
+
+      try {
+        // Try to fetch from the actual API
+        const res = await fetch('/api/cloned-emails');
+
+        if (!res.ok) {
+          // If the endpoint doesn't exist, use mock data
+          console.warn('API endpoint /api/cloned-emails not found, using mock data');
+
+          // Filter mock emails by extracted date
+          currentEmails = mockEmails.filter(e => {
+            let extracted = extractDateFromEmailName(e.name);
+            if (!extracted && e.scheduledTime) {
+              // fallback to scheduledTime (assume ISO string)
+              extracted = formatDate(e.scheduledTime);
+            }
+            return extracted === targetDateStr;
+          });
+        } else {
+          // Use the actual API data
+          const data = await res.json();
+
+          if (data.success && Array.isArray(data.data)) {
+            // Filter emails by extracted date (from name or scheduledTime)
+            currentEmails = data.data.filter(e => {
+              let extracted = extractDateFromEmailName(e.name);
+              if (!extracted && e.scheduledTime) {
+                // fallback to scheduledTime (assume ISO string)
+                extracted = formatDate(e.scheduledTime);
+              }
+              return extracted === targetDateStr;
+            });
+          } else {
+            currentEmails = [];
+          }
+        }
+
+        // Clear previous selections when loading new emails
+        selectedEmailIds.clear();
+        updateSelectedEmails();
+
+        if (currentEmails.length > 0) {
+          // Create email items
+          emailList.innerHTML = '';
+          currentEmails.forEach(email => {
+            const item = document.createElement('div');
+            const isPublished = publishedEmailIds.has(email.clonedEmailId);
+            item.className = `email-item ${isPublished ? 'published' : ''}`;
+            item.innerHTML = `
+              <input type="checkbox" class="email-checkbox" value="${email.clonedEmailId}" ${isPublished ? 'disabled' : ''}>
+              <div class="email-details">
+                <div class="email-name">${email.clonedEmailName || 'Unnamed Email'}</div>
+                <div class="email-id">ID: ${email.clonedEmailId}</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                ${isPublished ? `
+                  <button class="republish-toggle" data-email-id="${email.clonedEmailId}">
+                    <i class="bi bi-arrow-clockwise"></i> Republish
+                  </button>
+                ` : ''}
+                <span class="email-badge">${filter.toUpperCase()}</span>
+              </div>
+            `;
+            emailList.appendChild(item);
+          });
+
+          // Add event listeners to checkboxes
+          document.querySelectorAll('.email-item input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+              // Don't allow changes if checkbox is disabled or email is published
+              if (this.disabled || publishedEmailIds.has(this.value)) {
+                this.checked = false;
+                return;
+              }
+
+              if (this.checked) {
+                selectedEmailIds.add(this.value);
+              } else {
+                selectedEmailIds.delete(this.value);
+              }
+              updateSelectedEmails();
+              updateSelectAllCheckbox();
+              updateEmailIdsDisplay();
+              updateEmailIdsInput();
+              updateCounts();
+            });
+
+            // Also add click event to prevent any interaction
+            checkbox.addEventListener('click', function(e) {
+              if (this.disabled || publishedEmailIds.has(this.value)) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.checked = false;
+                return false;
+              }
+            });
+          });
+
+          // Add event listeners to republish toggles
+          document.querySelectorAll('.republish-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+              e.stopPropagation();
+              const emailId = this.getAttribute('data-email-id');
+              const emailItem = this.closest('.email-item');
+              const checkbox = emailItem.querySelector('.email-checkbox');
+
+              if (this.classList.contains('active')) {
+                // Cancel republish - make it published again
+                this.classList.remove('active');
+                this.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Republish';
+                emailItem.classList.add('published');
+                checkbox.disabled = true;
+                selectedEmailIds.delete(emailId);
+              } else {
+                // Enable republish - make it available for selection
+                this.classList.add('active');
+                this.innerHTML = '<i class="bi bi-x"></i> Cancel';
+                emailItem.classList.remove('published');
+                checkbox.disabled = false;
+              }
+
+              updateSelectedEmails();
+              updateSelectAllCheckbox();
+              updateEmailIdsDisplay();
+              updateEmailIdsInput();
+              updateCounts();
+            });
+          });
+
+          updateCounts();
+        } else {
+          emailList.innerHTML = `
+            <div class="text-center text-muted" style="padding: 40px;">
+              <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+              <p class="mt-3">No emails found for ${targetDateStr}</p>
+            </div>
+          `;
+          updateCounts();
+        }
+      } catch (e) {
+        console.error(e);
+        emailList.innerHTML = `
+          <div class="text-center text-muted" style="padding: 40px;">
+            <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
+            <p class="mt-3">Error loading emails. Please try again.</p>
+          </div>
+        `;
+      }
+
+      updateSelectAllCheckbox();
+    });
+
+    // Select all functionality
+    document.getElementById('selectAll').addEventListener('change', function () {
+      const checkboxes = document.querySelectorAll('.email-item input[type="checkbox"]');
+
+      checkboxes.forEach(checkbox => {
+        // Only handle non-disabled checkboxes and non-published emails
+        if (!checkbox.disabled && !publishedEmailIds.has(checkbox.value)) {
+          checkbox.checked = this.checked;
+
+          if (this.checked) {
+            selectedEmailIds.add(checkbox.value);
+          } else {
+            selectedEmailIds.delete(checkbox.value);
+          }
+        }
+      });
+
+      updateSelectedEmails();
+      updateEmailIdsDisplay();
+      updateEmailIdsInput();
+    });
+
+    // Publish emails
+    document.getElementById('publishBtn').addEventListener('click', async function () {
+      const scheduleTime = null; // Always publish immediately
+      const resultsSection = document.getElementById('resultsSection');
+      const resultsList = document.getElementById('resultsList');
+      const publishedCount = document.getElementById('publishedCount');
+
+      // Clear previous results
+      resultsList.innerHTML = '';
+      const resultsOverlay = document.getElementById('resultsOverlay');
+      resultsOverlay.classList.add('d-none');
+
+      // Get email IDs from both manual and selected arrays
+      const emailIds = [...manualEmailIds, ...Array.from(selectedEmailIds)];
+
+      if (emailIds.length === 0) {
+        alert('Please enter at least one valid email ID');
+        return;
+      }
+
+      // Disable button during processing
+      const publishBtn = document.getElementById('publishBtn');
+      publishBtn.disabled = true;
+      publishBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+
+      try {
+        // Show results overlay
+        resultsOverlay.classList.remove('d-none');
+        document.body.style.overflow = 'hidden';
+
+        // Process each email ID
+        let successCount = 0;
+        for (const emailId of emailIds) {
+          const resultItem = document.createElement('div');
+          resultItem.className = 'result-item processing';
+          resultItem.innerHTML = `<i class="bi bi-hourglass-split"></i> <strong>Email ID ${emailId}:</strong> Processing...`;
+          resultsList.appendChild(resultItem);
+
+          try {
+            // Publish or schedule the email directly
+            const response = await fetch('/api/publish-email', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                emailId,
+                scheduleTime: null
+              })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              const message = 'Published successfully';
+
+              resultItem.className = 'result-item success';
+              resultItem.innerHTML = `<i class="bi bi-check-circle"></i> <strong>Email ID ${emailId}:</strong> ${message}`;
+
+              // Mark email as published
+              publishedEmailIds.add(emailId);
+
+              // Remove from selections if it was selected
+              selectedEmailIds.delete(emailId);
+
+              // Update the email item in the DOM
+              const emailItem = document.querySelector(`.email-item input[value="${emailId}"]`)?.closest('.email-item');
+              if (emailItem) {
+                emailItem.classList.add('published');
+                const checkbox = emailItem.querySelector('.email-checkbox');
+                if (checkbox) {
+                  checkbox.disabled = true;
+                  checkbox.checked = false;
+                }
+
+                // Add republish button if not already present
+                const existingToggle = emailItem.querySelector('.republish-toggle');
+                if (!existingToggle) {
+                  const badgeContainer = emailItem.querySelector('div[style*="display: flex"]');
+                  if (badgeContainer) {
+                    badgeContainer.innerHTML = `
+                      <button class="republish-toggle" data-email-id="${emailId}">
+                        <i class="bi bi-arrow-clockwise"></i> Republish
+                      </button>
+                      ${badgeContainer.innerHTML}
+                    `;
+
+                    // Add event listener to the new toggle
+                    const newToggle = emailItem.querySelector('.republish-toggle');
+                    newToggle.addEventListener('click', function(e) {
+                      e.stopPropagation();
+                      const emailId = this.getAttribute('data-email-id');
+                      const emailItem = this.closest('.email-item');
+                      const checkbox = emailItem.querySelector('.email-checkbox');
+
+                      if (this.classList.contains('active')) {
+                        // Cancel republish - make it published again
+                        this.classList.remove('active');
+                        this.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Republish';
+                        emailItem.classList.add('published');
+                        checkbox.disabled = true;
+                        selectedEmailIds.delete(emailId);
+                      } else {
+                        // Enable republish - make it available for selection
+                        this.classList.add('active');
+                        this.innerHTML = '<i class="bi bi-x"></i> Cancel';
+                        emailItem.classList.remove('published');
+                        checkbox.disabled = false;
+                      }
+
+                      updateSelectedEmails();
+                      updateSelectAllCheckbox();
+                      updateEmailIdsDisplay();
+                      updateEmailIdsInput();
+                    });
+                  }
+                }
+              }
+
+              successCount++;
+            } else {
+              resultItem.className = 'result-item error';
+              resultItem.innerHTML = `<i class="bi bi-exclamation-circle"></i> <strong>Email ID ${emailId}:</strong> ${data.message || 'Failed to publish'}`;
+            }
+          } catch (error) {
+            resultItem.className = 'result-item error';
+            resultItem.innerHTML = `<i class="bi bi-exclamation-circle"></i> <strong>Email ID ${emailId}:</strong> Network error - ${error.message}`;
+          }
+
+          // Add a small delay between requests for better UX
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        // Update published count
+        const currentCount = parseInt(publishedCount.textContent) || 0;
+        publishedCount.textContent = currentCount + successCount;
+
+        // Show summary
+        const summaryItem = document.createElement('div');
+        summaryItem.className = 'result-item';
+        summaryItem.style.background = 'transparent';
+        summaryItem.style.borderLeft = 'none';
+        summaryItem.style.fontWeight = 'bold';
+        summaryItem.innerHTML = `<i class="bi ${successCount === emailIds.length ? 'bi-check-circle text-success' : successCount > 0 ? 'bi-info-circle text-warning' : 'bi-x-circle text-danger'}"></i> Processed ${emailIds.length} emails, ${successCount} successful`;
+        resultsList.appendChild(summaryItem);
+
+      } catch (error) {
+        console.error('Publishing error:', error);
+      } finally {
+        // Re-enable button
+        publishBtn.disabled = false;
+        publishBtn.innerHTML = '<i class="bi bi-send"></i> Publish Campaign';
+
+        // Update UI after publishing
+        updateSelectedEmails();
+        updateSelectAllCheckbox();
+        updateEmailIdsDisplay();
+        updateEmailIdsInput();
+        updateCounts();
+
+        // Save published state to localStorage
+        localStorage.setItem('publishedEmailIds', JSON.stringify(Array.from(publishedEmailIds)));
+      }
+    });
+
+
+    // Add event listener for individual email item clicks (not just checkbox)
+    document.addEventListener('click', function (e) {
+      const emailItem = e.target.closest('.email-item');
+      if (emailItem && !e.target.matches('input[type="checkbox"]') && !e.target.closest('.republish-toggle')) {
+        const checkbox = emailItem.querySelector('input[type="checkbox"]');
+
+        // Don't allow clicking on published emails
+        if (checkbox && !checkbox.disabled && !publishedEmailIds.has(checkbox.value)) {
+          checkbox.checked = !checkbox.checked;
+          if (checkbox.checked) {
+            selectedEmailIds.add(checkbox.value);
+          } else {
+            selectedEmailIds.delete(checkbox.value);
+          }
+          updateSelectedEmails();
+          updateSelectAllCheckbox();
+          updateEmailIdsDisplay();
+        }
+      }
+    });
+
+    // Close results overlay
+    document.addEventListener('click', function(e) {
+      if (e.target.id === 'closeResults' || e.target.id === 'resultsOverlay') {
+        const resultsOverlay = document.getElementById('resultsOverlay');
+        resultsOverlay.classList.add('d-none');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // Close overlay on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const resultsOverlay = document.getElementById('resultsOverlay');
+        if (!resultsOverlay.classList.contains('d-none')) {
+          resultsOverlay.classList.add('d-none');
+          document.body.style.overflow = 'auto';
+        }
+      }
+    });
+
+    // Initialize published emails from localStorage
+    function initializePublishedEmails() {
+      const stored = localStorage.getItem('publishedEmailIds');
+      if (stored) {
+        try {
+          const publishedArray = JSON.parse(stored);
+          publishedEmailIds = new Set(publishedArray);
+        } catch (error) {
+          console.error('Error loading published emails from localStorage:', error);
+          publishedEmailIds = new Set();
+        }
+      }
+    }
+
+    // Add event listeners for manual email ID input
+    document.addEventListener('DOMContentLoaded', function () {
+      // Initialize published emails
+      initializePublishedEmails();
+
+      const emailIdsInput = document.getElementById('emailIdsInput');
+      const clearAllBtn = document.getElementById('clearAllBtn');
+
+      // Handle Enter key press for adding email IDs
+      emailIdsInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addEmailId(this.value);
+          this.value = '';
+        }
+      });
+
+      // Handle comma-separated input
+      emailIdsInput.addEventListener('input', function() {
+        const value = this.value;
+        if (value.includes(',')) {
+          const ids = value.split(',');
+          const lastId = ids.pop(); // Keep the last part in input
+          ids.forEach(id => addEmailId(id));
+          this.value = lastId;
+        }
+      });
+
+      // Clear all email IDs (both manual and selected)
+      clearAllBtn.addEventListener('click', function() {
+        // Clear manual IDs
+        manualEmailIds = [];
+
+        // Clear selected IDs and uncheck all checkboxes
+        selectedEmailIds.forEach(emailId => {
+          const checkbox = document.querySelector(`.email-item input[value="${emailId}"]`);
+          if (checkbox) {
+            checkbox.checked = false;
+          }
+        });
+        selectedEmailIds.clear();
+
+        // Update all displays
+        updateEmailIdsDisplay();
+        updateSelectedEmails();
+        updateSelectAllCheckbox();
+      });
+
+      // Clear published history when clicking on published count
+      document.getElementById('publishedCard').addEventListener('click', function() {
+        if (publishedEmailIds.size > 0) {
+          if (confirm('Are you sure you want to clear all published email history? This will make all published emails available for republishing.')) {
+            publishedEmailIds.clear();
+            localStorage.removeItem('publishedEmailIds');
+
+            // Update all email items to remove published state
+            document.querySelectorAll('.email-item.published').forEach(item => {
+              item.classList.remove('published');
+              const checkbox = item.querySelector('.email-checkbox');
+              if (checkbox) {
+                checkbox.disabled = false;
+              }
+              const republishToggle = item.querySelector('.republish-toggle');
+              if (republishToggle) {
+                republishToggle.remove();
+              }
+            });
+
+            updateSelectAllCheckbox();
+            updateCounts();
+          }
+        }
+      });
+
+      // Initialize display only after DOM is ready
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        updateEmailIdsDisplay();
+        updateCounts();
+      } else {
+        window.addEventListener('load', function() {
+          updateEmailIdsDisplay();
+          updateCounts();
+        });
+      }
+
+      // Load today's emails by default
+      setTimeout(() => {
+        const loadBtn = document.getElementById('loadEmailsBtn');
+        if (loadBtn) {
+          loadBtn.click();
+        }
+      }, 100);
+
+      // Add some sample results for demonstration
+      setTimeout(() => {
+        // This is just for demo purposes - would be removed in production
+        if (window.location.search.includes('demo=true')) {
+          const resultsSection = document.getElementById('resultsSection');
+          const resultsList = document.getElementById('resultsList');
+
+          resultsSection.classList.remove('d-none');
+          resultsList.innerHTML = `
+            <div class="result-item success">
+              <i class="bi bi-check-circle"></i> <strong>Email ID EM001:</strong> Published successfully
+            </div>
+            <div class="result-item success">
+              <i class="bi bi-check-circle"></i> <strong>Email ID EM002:</strong> Scheduled for ${new Date(Date.now() + 86400000).toLocaleString()}
+            </div>
+            <div class="result-item error">
+              <i class="bi bi-exclamation-circle"></i> <strong>Email ID EM003:</strong> Email template not found
+            </div>
+          `;
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+
+</html>

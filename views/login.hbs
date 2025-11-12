@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Your App Name</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* Remove all focus effects globally */
+    * {
+      outline: none !important;
+    }
+
+    *:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    input:focus,
+    select:focus,
+    button:focus,
+    textarea:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Login Page Specific Styles */
+
+    main{
+        min-height: fit-content;
+        background-color:transparent;
+        box-shadow: none;
+    }
+    .login-page {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Poppins', sans-serif;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container-login {
+      max-width: 430px;
+      width: 100%;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      animation: fadeIn 0.5s ease-out forwards;
+      opacity: 0;
+      transform: scale(0.95);
+      padding: 30px;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .container-login .form {
+      width: 100%;
+      background-color: #fff;
+    }
+
+    .form .title {
+      position: relative;
+      font-size: 27px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .form .title::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 3px;
+      width: 30px;
+      background-color: #764ba2;
+      border-radius: 25px;
+    }
+
+    .form .input-field {
+      position: relative;
+      height: 50px;
+      width: 100%;
+      margin-top: 30px;
+    }
+
+    .input-field input {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      padding: 0 35px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      border-bottom: 2px solid #ccc;
+      border-top: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .input-field input:is(:valid) {
+      border-bottom-color: #764ba2;
+    }
+
+    .input-field input:focus {
+      outline: none !important;
+      border-bottom-color: #764ba2;
+    }
+
+    .input-field i {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 23px;
+      transition: all 0.2s ease;
+    }
+
+    .input-field i.icon {
+      left: 0;
+    }
+
+    .input-field i.showHidePw {
+      right: 0;
+      cursor: pointer;
+      padding: 10px;
+    }
+
+    .input-field input:is(:valid) ~ i {
+      color: #764ba2;
+    }
+
+    .input-field input:focus ~ i {
+      color: #764ba2;
+    }
+
+    .form .checkbox-text {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .checkbox-text .checkbox-content {
+      display: flex;
+      align-items: center;
+    }
+
+    .checkbox-content input {
+      margin-right: 10px;
+      accent-color: #764ba2;
+    }
+
+    .form .text {
+      color: #333;
+      font-size: 14px;
+    }
+
+    .form a.text {
+      color: #764ba2;
+      text-decoration: none;
+    }
+
+    .form a:hover {
+      text-decoration: underline;
+    }
+
+    .form .button {
+      margin-top: 35px;
+    }
+
+    .form .button input {
+      border: none;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      border-radius: 6px;
+      background-color: #764ba2;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      padding: 12px 0;
+    }
+
+    .button input:hover {
+      background-color: #5d3a8a;
+    }
+
+    .form .login-signup {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    /* Floating animation */
+    .input-field {
+      animation: floatIn 0.5s ease-out forwards;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    @keyframes floatIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Error shake animation */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .login-page {
+        padding: 15px;
+        min-height: 100vh;
+      }
+
+      .container-login {
+        max-width: 100%;
+        margin: 0;
+        padding: 25px;
+        border-radius: 8px;
+      }
+
+      .form .title {
+        font-size: 24px;
+        margin-bottom: 25px;
+      }
+
+      .input-field {
+        margin-top: 25px;
+      }
+
+      .input-field input {
+        padding: 0 30px;
+        font-size: 15px;
+      }
+
+      .input-field i {
+        font-size: 20px;
+      }
+
+      .button input {
+        padding: 14px 0;
+        font-size: 16px;
+      }
+
+      .login-signup {
+        margin-top: 25px;
+        font-size: 15px;
+      }
+
+      .form .text {
+        font-size: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .login-page {
+        padding: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .container-login {
+        padding: 20px;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.15);
+      }
+
+      .form .title {
+        font-size: 22px;
+        margin-bottom: 20px;
+      }
+
+      .input-field {
+        height: 48px;
+        margin-top: 20px;
+      }
+
+      .input-field input {
+        padding: 0 25px;
+        font-size: 16px; /* Prevent zoom on iOS */
+        height: 100%;
+      }
+
+      .input-field i {
+        font-size: 18px;
+      }
+
+      .input-field i.icon {
+        left: 0;
+        padding-left: 5px;
+      }
+
+      .input-field i.showHidePw {
+        right: 5px;
+        padding: 8px;
+      }
+
+      .button {
+        margin-top: 25px;
+      }
+
+      .button input {
+        padding: 12px 0;
+        font-size: 15px;
+        border-radius: 8px;
+        min-height: 44px; /* Touch-friendly */
+      }
+
+      .login-signup {
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .form .text {
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      /* Error message responsive */
+      .error-message {
+        padding: 8px !important;
+        margin-bottom: 12px !important;
+        font-size: 13px !important;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .container-login {
+        padding: 15px;
+      }
+
+      .form .title {
+        font-size: 20px;
+      }
+
+      .input-field {
+        margin-top: 18px;
+      }
+
+      .input-field input {
+        padding: 0 20px;
+        font-size: 16px;
+      }
+
+      .button input {
+        font-size: 14px;
+      }
+
+      .form .text {
+        font-size: 13px;
+      }
+    }
+
+    /* Touch-friendly adjustments */
+    @media (hover: none) and (pointer: coarse) {
+      .input-field input {
+        min-height: 44px;
+        font-size: 16px; /* Prevent zoom on iOS */
+      }
+
+      .button input {
+        min-height: 44px;
+      }
+
+      .input-field i.showHidePw {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    /* Landscape mode for mobile */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .login-page {
+        padding: 20px 5px;
+      }
+
+      .container-login {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .form .title {
+        font-size: 22px;
+        margin-bottom: 15px;
+      }
+
+      .input-field {
+        margin-top: 15px;
+      }
+
+      .button {
+        margin-top: 20px;
+      }
+
+      .login-signup {
+        margin-top: 15px;
+      }
+    }
+
+    /* High DPI/Retina displays */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      .container-login {
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+      }
+    }
+  </style>
+</head>
+<body class="login-page">
+  <div class="container-login">
+      <!-- Login Form -->
+      <div class="form login">
+        <span class="title">Login</span>
+
+        {{#if error}}
+        <div class="error-message" style="background-color: #fee; color: #c33; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; text-align: center; animation: shake 0.3s;">
+          {{error}}
+        </div>
+        {{/if}}
+
+        <form action="/login" method="POST">
+          <div class="input-field" style="animation-delay: 0.1s">
+            <input type="email" name="email" placeholder="Enter your email" value="{{email}}" required>
+            <i class="fas fa-envelope icon"></i>
+          </div>
+          <div class="input-field" style="animation-delay: 0.2s">
+            <input type="password" name="password" class="password" placeholder="Enter your password" required>
+            <i class="fas fa-lock icon"></i>
+            <i class="fas fa-eye-slash showHidePw"></i>
+          </div>
+          
+        
+          
+          <div class="input-field button" style="animation-delay: 0.4s">
+            <input type="submit" value="Login">
+          </div>
+        </form>
+        
+        <div class="login-signup" style="animation-delay: 0.5s; color: #666; font-size: 14px;">
+          <span class="text">For login credentials, please contact the administrator.</span>
+        </div>
+      </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const pwShowHide = document.querySelectorAll(".showHidePw");
+      const pwFields = document.querySelectorAll(".password");
+
+      // Show/hide password
+      pwShowHide.forEach(eyeIcon => {
+        eyeIcon.addEventListener("click", () => {
+          pwFields.forEach(pwField => {
+            if(pwField.type === "password") {
+              pwField.type = "text";
+              eyeIcon.classList.replace("fa-eye-slash", "fa-eye");
+            } else {
+              pwField.type = "password";
+              eyeIcon.classList.replace("fa-eye", "fa-eye-slash");
+            }
+          });
+        });
+      });
+      
+      // Animate input fields
+      document.querySelectorAll('.input-field').forEach((field, index) => {
+        field.style.animationDelay = `${index * 0.1 + 0.3}s`;
+      });
+    });
+  </script>
+</body>
+</html>

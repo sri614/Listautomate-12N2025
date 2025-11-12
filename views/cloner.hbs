@@ -1,0 +1,1124 @@
+
+
+
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+
+<div
+  class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl">
+  <div class="flex items-center justify-center mb-8">
+    <div class="bg-indigo-600 p-3 rounded-lg mr-4 shadow-md">
+      <i class="fas fa-clone text-white" style="font-size: 24px;"></i>
+    </div>
+    <h1 class="font-bold text-center text-indigo-700" style="font-size: 28px;">
+      Email Cloner
+    </h1>
+  </div>
+
+  <form id="emailForm" class="space-y-6">
+    <div class="space-y-3">
+      <div class="space-y-3">
+        <div class="relative">
+          <input type="text" id="emailIdsInput"
+            class="w-full border-2 border-gray-300 p-4 rounded-lg transition-all duration-200"
+            placeholder="Enter email ID and press Enter to add..."
+            pattern="[0-9,]*"
+            inputmode="numeric">
+        </div>
+
+        <!-- Email IDs Display Area -->
+        <div id="emailIdsContainer" class="min-h-[100px] border-2 border-gray-200 rounded-lg p-3 bg-gray-50">
+          <div id="emailIdsList" class="flex flex-wrap gap-2 min-h-[60px]">
+            <div id="emptyState" class="w-full flex items-center justify-center text-gray-400 text-sm py-8">
+              <i class="fas fa-inbox mr-2"></i>
+              No email IDs added yet. Type an ID and press Enter to add.
+            </div>
+          </div>
+          <div class="mt-3 pt-3 border-t border-gray-300 flex justify-between items-center">
+            <div class="text-sm font-medium text-indigo-700">
+              <i class="fas fa-envelope mr-1"></i>
+              <span id="emailCount">0</span> email IDs added
+            </div>
+            <button type="button" id="clearAllBtn" class="text-red-500 hover:text-red-700 text-sm font-medium" style="display: none;">
+              <i class="fas fa-trash mr-1"></i>
+              Clear All
+            </button>
+          </div>
+        </div>
+
+        <!-- Hidden textarea for form submission -->
+        <textarea id="emailIds" name="emailIds" class="hidden" required></textarea>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="cloningCount" class="block font-semibold text-gray-800 mb-2 flex items-center">
+          <i class="fas fa-calendar-alt mr-2 text-indigo-500"></i>
+          Number of Days
+        </label>
+        <input type="number" id="cloningCount" min="1" max="30" value="1"
+          class="w-full border-2 border-gray-300 p-3 rounded-lg transition-all duration-200"
+          required />
+      </div>
+      <div>
+        <label for="timeStrategy" class="block font-semibold text-gray-800 mb-2 flex items-center">
+          <i class="fas fa-clock mr-2 text-indigo-500"></i>
+          Scheduling Strategy
+        </label>
+        <select id="timeStrategy"
+          class="w-full border-2 border-gray-300 p-3 rounded-lg transition-all duration-200 cursor-pointer">
+          <option value="smart">Smart Distribution (11AM & 4PM)</option>
+          <option value="morning">Morning Only (11AM)</option>
+          <option value="afternoon">Afternoon Only (4PM)</option>
+          <option value="custom">Custom Times</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Update the custom time options section -->
+    <div id="customTimeOptions" class="hidden space-y-4 p-4 bg-gray-50 rounded-lg">
+      <h4 class="font-semibold text-gray-800 flex items-center">
+        <i class="fas fa-cog mr-2 text-indigo-500"></i>
+        Custom Timing Configuration
+      </h4>
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <label for="startHour" class="block text-sm font-medium text-gray-700">Start Hour (0-23)</label>
+          <input type="number" id="startHour" min="0" max="23" value="11"
+            class="w-full p-2 border rounded-md">
+        </div>
+        <div>
+          <label for="startMinute" class="block text-sm font-medium text-gray-700">Start Minute (0-59)</label>
+          <input type="number" id="startMinute" min="0" max="59" value="0"
+            class="w-full p-2 border rounded-md">
+        </div>
+        <div>
+          <label for="interval" class="block text-sm font-medium text-gray-700">Interval (minutes)</label>
+          <input type="number" id="interval" min="1" max="60" value="5"
+            class="w-full p-2 border rounded-md">
+        </div>
+      </div>
+      <div class="text-sm text-gray-600 bg-blue-50 p-2 rounded-md">
+        <i class="fas fa-info-circle mr-1 text-blue-500"></i>
+        <strong>Custom timing follows the 11 AM-11:55 AM rule:</strong><br>
+        • Times within 11:00-11:55 AM will be scheduled as specified<br>
+        • Times outside this range will move to 4:00 PM onwards<br>
+        • Example: 5-min intervals from 11:50 → 11:50, 11:55, 16:00, 16:05, etc.
+      </div>
+    </div>
+
+    <div class="pt-4">
+      <button type="submit" id="submitBtn"
+        class="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
+        <i class="fas fa-rocket mr-2"></i>
+        <span>Start Cloning Process</span>
+      </button>
+    </div>
+  </form>
+
+  <div class="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="font-semibold text-gray-800 flex items-center">
+        <i class="fas fa-chart-line mr-2 text-indigo-500"></i>
+        Process Status
+      </h3>
+      <div id="statusText"
+        class="px-3 py-1 bg-white rounded-lg text-sm font-semibold text-indigo-600 border border-gray-200">Ready</div>
+    </div>
+    <div class="bg-white rounded-lg h-3 border border-gray-200 overflow-hidden">
+      <div id="progressBar" class="progress-bar bg-indigo-600 rounded-lg h-3 transition-all duration-300"
+        style="width: 0%">
+      </div>
+    </div>
+  </div>
+
+  <div id="logArea"
+    class="mt-6 text-sm bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-y-auto max-h-80 font-mono space-y-2">
+    <div class="text-center text-gray-500 py-6">
+      <i class="fas fa-terminal text-2xl mb-2 text-gray-400"></i>
+      <p>Logs will appear here when the process starts</p>
+    </div>
+  </div>
+
+  <div id="stats" class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center hidden">
+    <div
+      class="bg-indigo-50 p-4 rounded-lg shadow-sm border border-indigo-100 hover:shadow-md transition-shadow duration-200">
+      <div class="text-indigo-800 font-bold text-xl" id="totalAttempted">0</div>
+      <div class="text-indigo-600 text-sm font-medium mt-1">Total Attempted</div>
+    </div>
+    <div
+      class="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100 hover:shadow-md transition-shadow duration-200">
+      <div class="text-blue-800 font-bold text-xl" id="successCount">0</div>
+      <div class="text-blue-600 text-sm font-medium mt-1">Successfully Cloned</div>
+    </div>
+    <div
+      class="bg-yellow-50 p-4 rounded-lg shadow-sm border border-yellow-100 hover:shadow-md transition-shadow duration-200">
+      <div class="text-yellow-800 font-bold text-xl" id="duplicatesSkipped">0</div>
+      <div class="text-yellow-600 text-sm font-medium mt-1">Duplicates Skipped</div>
+    </div>
+    <div
+      class="bg-red-50 p-4 rounded-lg shadow-sm border border-red-100 hover:shadow-md transition-shadow duration-200">
+      <div class="text-red-800 font-bold text-xl" id="errorCount">0</div>
+      <div class="text-red-600 text-sm font-medium mt-1">Errors</div>
+    </div>
+  </div>
+
+  <!-- View Cloned Emails Section -->
+  <div class="mt-8 border-t border-gray-200 pt-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-semibold text-lg text-gray-800 flex items-center">
+        <i class="fas fa-history mr-2 text-indigo-500"></i>
+        Cloned Emails History
+      </h3>
+      <button id="viewClonedBtn"
+        class="bg-indigo-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200 shadow-sm hover:shadow-md flex items-center">
+        <i class="fas fa-database mr-2"></i>
+        View Cloned Emails
+      </button>
+    </div>
+
+    <div id="clonedEmailsList" class="hidden bg-white p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
+      <div class="text-center text-gray-500 py-6">
+        <i class="fas fa-inbox text-3xl mb-2 text-gray-400"></i>
+        <p class="font-medium">Click "View Cloned Emails" to load history</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Dialog Box -->
+<div id="customDialog" class="custom-dialog-overlay" style="display: none;">
+  <div class="custom-dialog">
+    <div class="custom-dialog-header">
+      <h3 id="dialogTitle">Notification</h3>
+      <button class="custom-dialog-close" onclick="closeDialog()">&times;</button>
+    </div>
+    <div class="custom-dialog-body">
+      <div id="dialogIcon" class="dialog-icon"></div>
+      <p id="dialogMessage">Message goes here</p>
+    </div>
+    <div class="custom-dialog-footer">
+      <button id="dialogConfirmBtn" class="dialog-btn dialog-btn-primary" onclick="closeDialog()">OK</button>
+      <button id="dialogCancelBtn" class="dialog-btn dialog-btn-secondary" onclick="closeDialog()"
+        style="display: none;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Custom Dialog Styles */
+  .custom-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: not-allowed;
+  }
+
+  .custom-dialog-overlay.show {
+    opacity: 1;
+  }
+
+  .custom-dialog {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 450px;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    animation: dialogSlideIn 0.3s ease forwards;
+    cursor: default;
+  }
+
+  @keyframes dialogSlideIn {
+    from {
+      transform: translateY(-30px) scale(0.95);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  .custom-dialog-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .custom-dialog-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .custom-dialog-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+
+  .custom-dialog-close:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+  }
+
+  .custom-dialog-body {
+    padding: 24px;
+    text-align: center;
+  }
+
+  .dialog-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .dialog-icon.success {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .dialog-icon.success::before {
+    content: "✓";
+  }
+
+  .dialog-icon.error {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .dialog-icon.error::before {
+    content: "✕";
+  }
+
+  .dialog-icon.warning {
+    background: #fed7aa;
+    color: #9a3412;
+  }
+
+  .dialog-icon.warning::before {
+    content: "!";
+  }
+
+  .dialog-icon.info {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .dialog-icon.info::before {
+    content: "i";
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  #dialogMessage {
+    font-size: 15px;
+    color: #4b5563;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .custom-dialog-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .dialog-btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    outline: none;
+  }
+
+  .dialog-btn-primary {
+    background: #1654a0;
+    color: white;
+  }
+
+  .dialog-btn-primary:hover {
+    background: #1e5ba8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(22, 84, 160, 0.3);
+  }
+
+  .dialog-btn-secondary {
+    background: #e5e7eb;
+    color: #374151;
+  }
+
+  .dialog-btn-secondary:hover {
+    background: #d1d5db;
+  }
+
+  /* Remove all focus effects */
+  * {
+    outline: none !important;
+  }
+
+  *:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    ring: none !important;
+  }
+
+  input:focus,
+  select:focus,
+  button:focus,
+  textarea:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    ring: none !important;
+    border-color: inherit !important;
+  }
+
+  /* Override Tailwind focus styles */
+  .focus\:ring-2:focus,
+  .focus\:ring-indigo-500:focus,
+  .focus\:border-indigo-500:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    ring: none !important;
+    border-color: inherit !important;
+  }
+
+  /* Email ID Card Hover Effects */
+  .email-id-card {
+    transform: scale(1);
+  }
+
+  .email-id-card:hover {
+    transform: scale(1.02) translateY(-1px);
+  }
+
+  .email-id-card:active {
+    transform: scale(0.98);
+  }
+
+  /* Smooth animation for pulse effect */
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .animate-pulse {
+    animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Remove button enhanced hover */
+  .remove-email-btn {
+    opacity: 0.7;
+  }
+
+  .email-id-card:hover .remove-email-btn {
+    opacity: 1;
+  }
+
+  /* Search bar styles */
+  #emailSearchInput:focus {
+    outline: none !important;
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+  }
+
+  /* Smooth transition for search results */
+  .email-item {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Clear button hover effect */
+  #clearSearchBtn:hover {
+    transform: rotate(90deg);
+    transition: transform 0.2s ease;
+  }
+
+  /* Sticky search bar shadow on scroll */
+  #clonedEmailsContainer::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #clonedEmailsContainer::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  #clonedEmailsContainer::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+
+  #clonedEmailsContainer::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  // Custom Dialog Functions
+  let dialogCallback = null;
+
+  function showDialog(message, type = 'info', title = null) {
+    const dialog = document.getElementById('customDialog');
+    const dialogTitle = document.getElementById('dialogTitle');
+    const dialogMessage = document.getElementById('dialogMessage');
+    const dialogIcon = document.getElementById('dialogIcon');
+    const confirmBtn = document.getElementById('dialogConfirmBtn');
+    const cancelBtn = document.getElementById('dialogCancelBtn');
+
+    // Set title
+    dialogTitle.textContent = title || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : type === 'warning' ? 'Warning' : 'Information');
+
+    // Set message
+    dialogMessage.innerHTML = message.replace(/\n/g, '<br>');
+
+    // Set icon type
+    dialogIcon.className = 'dialog-icon ' + type;
+
+    // Hide cancel button for notifications
+    cancelBtn.style.display = 'none';
+    confirmBtn.textContent = 'OK';
+
+    // Show dialog
+    dialog.style.display = 'flex';
+    setTimeout(() => dialog.classList.add('show'), 10);
+  }
+
+  function showConfirm(message, callback, title = 'Confirm') {
+    const dialog = document.getElementById('customDialog');
+    const dialogTitle = document.getElementById('dialogTitle');
+    const dialogMessage = document.getElementById('dialogMessage');
+    const dialogIcon = document.getElementById('dialogIcon');
+    const confirmBtn = document.getElementById('dialogConfirmBtn');
+    const cancelBtn = document.getElementById('dialogCancelBtn');
+
+    // Set title
+    dialogTitle.textContent = title;
+
+    // Set message
+    dialogMessage.innerHTML = message.replace(/\n/g, '<br>');
+
+    // Set icon type
+    dialogIcon.className = 'dialog-icon warning';
+
+    // Show both buttons
+    cancelBtn.style.display = 'inline-block';
+    confirmBtn.textContent = 'Confirm';
+
+    // Set callback
+    dialogCallback = callback;
+
+    // Update confirm button onclick
+    confirmBtn.onclick = function () {
+      closeDialog();
+      if (dialogCallback) {
+        dialogCallback(true);
+        dialogCallback = null;
+      }
+    };
+
+    // Update cancel button onclick
+    cancelBtn.onclick = function () {
+      closeDialog();
+      if (dialogCallback) {
+        dialogCallback(false);
+        dialogCallback = null;
+      }
+    };
+
+    // Show dialog
+    dialog.style.display = 'flex';
+    setTimeout(() => dialog.classList.add('show'), 10);
+  }
+
+  function closeDialog() {
+    const dialog = document.getElementById('customDialog');
+    dialog.classList.remove('show');
+    setTimeout(() => {
+      dialog.style.display = 'none';
+      dialogCallback = null;
+    }, 300);
+  }
+
+  // Prevent closing dialog on overlay click
+  document.addEventListener('DOMContentLoaded', function () {
+    const dialog = document.getElementById('customDialog');
+    dialog.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+  });
+
+  const form = document.getElementById('emailForm');
+  const logArea = document.getElementById('logArea');
+  const progressBar = document.getElementById('progressBar');
+  const statusText = document.getElementById('statusText');
+  const statsSection = document.getElementById('stats');
+  const emailCount = document.getElementById('emailCount');
+  const timeStrategy = document.getElementById('timeStrategy');
+  const customTimeOptions = document.getElementById('customTimeOptions');
+  const submitBtn = document.getElementById('submitBtn');
+  const viewClonedBtn = document.getElementById('viewClonedBtn');
+  const clonedEmailsList = document.getElementById('clonedEmailsList');
+
+  let stats = {
+    totalAttempted: 0,
+    successCount: 0,
+    duplicatesSkipped: 0,
+    errorCount: 0
+  };
+
+  // Email ID management
+  let emailIdsArray = [];
+
+  const emailIdsInput = document.getElementById('emailIdsInput');
+  const emailIdsList = document.getElementById('emailIdsList');
+  const emptyState = document.getElementById('emptyState');
+  const clearAllBtn = document.getElementById('clearAllBtn');
+  const hiddenTextarea = document.getElementById('emailIds');
+
+  function updateEmailIdsDisplay() {
+    emailIdsList.innerHTML = '';
+
+    if (emailIdsArray.length === 0) {
+      emptyState.style.display = 'flex';
+      clearAllBtn.style.display = 'none';
+    } else {
+      emptyState.style.display = 'none';
+      clearAllBtn.style.display = 'block';
+
+      emailIdsArray.forEach((emailId, index) => {
+        const card = document.createElement('div');
+        card.className = 'email-id-card inline-flex items-center bg-white border border-indigo-200 rounded-full px-3 py-2 text-sm font-medium text-indigo-800 shadow-sm hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50 transition-all duration-200 cursor-pointer';
+        card.innerHTML = `
+          <span class="mr-2">${emailId}</span>
+          <button type="button" class="remove-email-btn text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full p-1 ml-1 transition-all duration-200" data-index="${index}">
+            <i class="fas fa-times text-xs"></i>
+          </button>
+        `;
+        emailIdsList.appendChild(card);
+      });
+
+      // Add event listeners to remove buttons
+      document.querySelectorAll('.remove-email-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const index = parseInt(this.getAttribute('data-index'));
+          emailIdsArray.splice(index, 1);
+          updateEmailIdsDisplay();
+          updateHiddenTextarea();
+        });
+      });
+    }
+
+    emailCount.textContent = emailIdsArray.length;
+    updateHiddenTextarea();
+  }
+
+  function updateHiddenTextarea() {
+    hiddenTextarea.value = emailIdsArray.join(',');
+  }
+
+  function addEmailId(emailId) {
+    const trimmedId = emailId.trim();
+    if (trimmedId) {
+      // Validate that the email ID contains only numbers
+      if (!/^\d+$/.test(trimmedId)) {
+        // Show error for non-numeric input
+        emailIdsInput.classList.add('border-red-500', 'bg-red-50');
+        emailIdsInput.placeholder = 'Email ID must contain only numbers!';
+        emailIdsInput.value = '';
+        setTimeout(() => {
+          emailIdsInput.classList.remove('border-red-500', 'bg-red-50');
+          emailIdsInput.placeholder = 'Enter email ID and press Enter to add...';
+        }, 2000);
+        return;
+      }
+
+      if (emailIdsArray.includes(trimmedId)) {
+        // Show duplicate warning with visual feedback
+        showDuplicateWarning(trimmedId);
+        emailIdsInput.value = '';
+        return;
+      }
+      emailIdsArray.push(trimmedId);
+      updateEmailIdsDisplay();
+      emailIdsInput.value = '';
+    }
+  }
+
+  function showDuplicateWarning(emailId) {
+    // Temporarily highlight the input with error styling
+    emailIdsInput.classList.add('border-red-500', 'bg-red-50');
+    emailIdsInput.placeholder = `"${emailId}" already exists!`;
+
+    // Find and highlight the existing card
+    const existingCards = document.querySelectorAll('.email-id-card');
+    existingCards.forEach(card => {
+      const cardText = card.querySelector('span').textContent;
+      if (cardText === emailId) {
+        card.classList.add('bg-yellow-100', 'border-yellow-400', 'animate-pulse');
+        setTimeout(() => {
+          card.classList.remove('bg-yellow-100', 'border-yellow-400', 'animate-pulse');
+        }, 2000);
+      }
+    });
+
+    // Reset input styling after delay
+    setTimeout(() => {
+      emailIdsInput.classList.remove('border-red-500', 'bg-red-50');
+      emailIdsInput.placeholder = 'Enter email ID and press Enter to add...';
+    }, 2000);
+  }
+
+  // Handle Enter key press
+  emailIdsInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addEmailId(this.value);
+    }
+  });
+
+  // Handle comma-separated input
+  emailIdsInput.addEventListener('input', function() {
+    const value = this.value;
+    if (value.includes(',')) {
+      const ids = value.split(',');
+      const lastId = ids.pop(); // Keep the last part in input
+      ids.forEach(id => addEmailId(id));
+      this.value = lastId;
+    }
+  });
+
+  // Clear all button
+  clearAllBtn.addEventListener('click', function() {
+    emailIdsArray = [];
+    updateEmailIdsDisplay();
+  });
+
+  // Initialize display
+  updateEmailIdsDisplay();
+
+  // Show/hide custom time options
+  timeStrategy.addEventListener('change', function () {
+    customTimeOptions.classList.toggle('hidden', this.value !== 'custom');
+  });
+
+  function updateStats() {
+    document.getElementById('totalAttempted').textContent = stats.totalAttempted;
+    document.getElementById('successCount').textContent = stats.successCount;
+    document.getElementById('duplicatesSkipped').textContent = stats.duplicatesSkipped;
+    document.getElementById('errorCount').textContent = stats.errorCount;
+  }
+
+  function log(message, type = 'info') {
+    const colors = {
+      info: 'text-gray-800',
+      success: 'text-green-600',
+      error: 'text-red-600',
+      warning: 'text-yellow-600'
+    };
+
+    const icons = {
+      info: 'fa-info-circle',
+      success: 'fa-check-circle',
+      error: 'fa-times-circle',
+      warning: 'fa-exclamation-circle'
+    };
+
+    if (logArea.firstChild?.textContent.includes("Logs will appear here")) {
+      logArea.innerHTML = '';
+    }
+
+    const entry = document.createElement('div');
+    entry.className = `log-entry flex items-start ${colors[type]}`;
+    entry.innerHTML = `
+      <i class="fas ${icons[type]} mt-1 mr-2"></i>
+      <div>${message}</div>
+    `;
+    logArea.appendChild(entry);
+    logArea.scrollTop = logArea.scrollHeight;
+  }
+
+  function updateProgress(percent) {
+    progressBar.style.width = `${percent}%`;
+    progressBar.classList.toggle('bg-indigo-600', percent < 100);
+    progressBar.classList.toggle('bg-green-500', percent === 100);
+  }
+
+  // Store emails globally for search functionality
+  let allClonedEmails = [];
+
+  // Search functionality
+  function searchEmails() {
+    const searchInput = document.getElementById('emailSearchInput');
+    if (!searchInput) return;
+
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const emailsContainer = document.getElementById('clonedEmailsContainer');
+    const searchResultsCount = document.getElementById('searchResultsCount');
+
+    if (!emailsContainer) return;
+
+    let filteredEmails = allClonedEmails;
+
+    if (searchTerm) {
+      filteredEmails = allClonedEmails.filter(email => {
+        return email.clonedEmailName.toLowerCase().includes(searchTerm) ||
+               email.clonedEmailId.toString().includes(searchTerm) ||
+               email.originalEmailId.toString().includes(searchTerm) ||
+               new Date(email.scheduledTime).toLocaleString().toLowerCase().includes(searchTerm);
+      });
+    }
+
+    // Update results count
+    if (searchResultsCount) {
+      searchResultsCount.textContent = searchTerm
+        ? `Showing ${filteredEmails.length} of ${allClonedEmails.length} emails`
+        : `Showing ${filteredEmails.length} cloned emails`;
+    }
+
+    // Render filtered emails
+    renderEmailsList(filteredEmails, emailsContainer);
+  }
+
+  function renderEmailsList(emails, container) {
+    if (!container) return;
+
+    if (emails.length === 0) {
+      container.innerHTML = `
+        <div class="text-center text-gray-400 py-8">
+          <i class="fas fa-search text-3xl mb-2"></i>
+          <p>No emails found matching your search</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+    emails.forEach(email => {
+      const date = new Date(email.scheduledTime).toLocaleString();
+      html += `
+        <div class="bg-white p-3 rounded-lg border border-gray-200 mb-2 email-item">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <div class="font-medium text-gray-800">${email.clonedEmailName}</div>
+              <div class="text-sm text-gray-500 mt-1">
+                <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">ID: ${email.clonedEmailId}</span>
+                <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded ml-2">Scheduled: ${date}</span>
+              </div>
+              <div class="text-xs text-gray-400 mt-1">
+                Original ID: ${email.originalEmailId} | Created: ${new Date(email.createdAt).toLocaleString()}
+              </div>
+            </div>
+            <button
+              class="delete-btn ml-2 text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"
+              data-id="${email._id}"
+              title="Delete from database"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+    attachDeleteListeners();
+  }
+
+  function attachDeleteListeners() {
+    // Add event listeners to delete buttons
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const target = e.currentTarget || e.target;
+        const emailId = target.getAttribute('data-id');
+
+        if (!target || !emailId) {
+          console.error('Delete error: Missing target element or email ID');
+          log('✗ Error: Could not identify email to delete', 'error');
+          return;
+        }
+
+        showConfirm('Are you sure you want to delete this cloned email record from both the database and HubSpot?', async (confirmed) => {
+          if (!confirmed) return;
+
+          try {
+            // Updated API endpoint path
+            const response = await axios.delete(`/api/cloned-emails/${emailId}`);
+
+            // Remove from global array
+            allClonedEmails = allClonedEmails.filter(email => email._id !== emailId);
+
+            // Refresh the search results
+            searchEmails();
+
+            // Show appropriate success message based on HubSpot deletion status
+            const data = response.data;
+            if (data.hubspotDeleted) {
+              log('✓ Cloned email deleted successfully from both database and HubSpot', 'success');
+            } else if (data.hubspotError) {
+              log(`✓ Cloned email deleted from database. HubSpot deletion failed: ${data.hubspotError}`, 'warning');
+            } else {
+              log('✓ Cloned email deleted from database (no HubSpot ID found)', 'success');
+            }
+          } catch (error) {
+            console.error('Delete error:', error);
+            log('✗ Error deleting cloned email record: ' + (error.response?.data?.message || error.message), 'error');
+          }
+        }, 'Delete Confirmation');
+      });
+    });
+  }
+
+  // View cloned emails function
+  async function viewClonedEmails() {
+    try {
+      clonedEmailsList.classList.remove('hidden');
+      clonedEmailsList.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-indigo-600 mr-2"></i>Loading cloned emails...</div>';
+
+      // Updated API endpoint path
+      const response = await axios.get('/api/cloned-emails');
+      allClonedEmails = response.data.data;
+
+      if (allClonedEmails.length === 0) {
+        clonedEmailsList.innerHTML = '<div class="text-center text-gray-400 py-4">No cloned emails found</div>';
+        return;
+      }
+
+      let html = `
+        <!-- Search Bar -->
+        <div class="mb-4 sticky top-0 bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">
+          <div class="flex items-center space-x-3">
+            <div class="flex-1 relative">
+              <input
+                type="text"
+                id="emailSearchInput"
+                placeholder="Search by name, ID, or date..."
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                oninput="searchEmails()"
+              >
+              <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <button
+              id="clearSearchBtn"
+              type="button"
+              class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+              title="Clear search"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="mt-2 text-sm text-gray-600" id="searchResultsCount">
+            <i class="fas fa-info-circle mr-1"></i>
+            Showing ${allClonedEmails.length} cloned emails
+          </div>
+        </div>
+
+        <!-- Emails Container -->
+        <div id="clonedEmailsContainer" class="max-h-80 overflow-y-auto pr-2">
+          <!-- Emails will be rendered here -->
+        </div>
+      `;
+
+      clonedEmailsList.innerHTML = html;
+
+      // Render initial emails list
+      const emailsContainer = document.getElementById('clonedEmailsContainer');
+      if (emailsContainer) {
+        renderEmailsList(allClonedEmails, emailsContainer);
+      }
+
+      // Add event listener for clear button
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+          const searchInput = document.getElementById('emailSearchInput');
+          if (searchInput) {
+            searchInput.value = '';
+            searchEmails();
+          }
+        });
+      }
+
+    } catch (error) {
+      console.error('View cloned emails error:', error);
+      clonedEmailsList.innerHTML = '<div class="text-center text-red-500 py-4">Error loading cloned emails: ' + (error.response?.data?.message || error.message) + '</div>';
+      log('Error loading cloned emails: ' + (error.response?.data?.message || error.message), 'error');
+    }
+  }
+
+  viewClonedBtn.addEventListener('click', viewClonedEmails);
+
+  // Update the form submission handler
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const emailIds = emailIdsArray.filter(id => id.trim() !== '');
+    const cloningCount = parseInt(document.getElementById('cloningCount').value, 10);
+    const strategy = timeStrategy.value;
+
+    // Get custom time parameters if strategy is 'custom'
+    let customStartHour = null;
+    let customStartMinute = null;
+    let customInterval = null;
+
+    if (strategy === 'custom') {
+      customStartHour = parseInt(document.getElementById('startHour').value, 10);
+      customStartMinute = parseInt(document.getElementById('startMinute').value, 10);
+      customInterval = parseInt(document.getElementById('interval').value, 10);
+
+      if (isNaN(customStartHour) || customStartHour < 0 || customStartHour > 23) {
+        log('Please enter a valid start hour (0-23)', 'error');
+        return;
+      }
+
+      if (isNaN(customStartMinute) || customStartMinute < 0 || customStartMinute > 59) {
+        log('Please enter a valid start minute (0-59)', 'error');
+        return;
+      }
+
+      if (isNaN(customInterval) || customInterval < 1 || customInterval > 60) {
+        log('Please enter a valid interval (1-60 minutes)', 'error');
+        return;
+      }
+    }
+
+    if (emailIds.length === 0) {
+      log('Please enter at least one email ID', 'error');
+      return;
+    }
+
+    // Reset UI
+    logArea.innerHTML = '';
+    statsSection.classList.remove('hidden');
+    stats = {
+      totalAttempted: emailIds.length * cloningCount,
+      successCount: 0,
+      duplicatesSkipped: 0,
+      errorCount: 0
+    };
+    updateStats();
+    updateProgress(0);
+    statusText.textContent = 'Processing...';
+    statusText.className = 'px-3 py-1 bg-white rounded-lg text-sm font-semibold text-indigo-600 border border-gray-200';
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+
+    try {
+      log(`🚀 Starting to clone ${emailIds.length} emails for ${cloningCount} day(s)`, 'info');
+      log(`⏳ Using scheduling strategy: ${strategy}`, 'info');
+
+      if (strategy === 'custom') {
+        const startTime = `${customStartHour}:${customStartMinute.toString().padStart(2, '0')}`;
+        log(`🕒 Custom timing: Start at ${startTime} with ${customInterval}-minute intervals`, 'info');
+      }
+
+      // Build request payload
+      const requestPayload = {
+        emailIds,
+        cloningCount,
+        strategy
+      };
+
+      // Add custom time parameters if strategy is custom
+      if (strategy === 'custom') {
+        requestPayload.customStartHour = customStartHour;
+        requestPayload.customStartMinute = customStartMinute;
+        requestPayload.customInterval = customInterval;
+      }
+
+      const response = await axios.post('/api/clone-emails', requestPayload);
+
+      if (response.data.success) {
+        const result = response.data;
+        log(`✅ ${result.message}`, 'success');
+        log(`📊 ${result.stats.successfullyCloned} emails cloned, ${result.stats.duplicatesSkipped} duplicates skipped, ${result.stats.errors} errors`, 'info');
+
+        // Update stats from backend response
+        stats.successCount = result.stats.successfullyCloned;
+        stats.duplicatesSkipped = result.stats.duplicatesSkipped;
+        stats.errorCount = result.stats.errors;
+        updateStats();
+
+        statusText.textContent = 'Completed';
+        statusText.className = 'px-3 py-1 bg-white rounded-lg text-sm font-semibold text-green-600 border border-gray-200';
+        updateProgress(100);
+
+        // Show completion animation
+        submitBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Process Complete!';
+        submitBtn.className = 'w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center';
+
+        setTimeout(() => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-rocket mr-2"></i> Start Again';
+          submitBtn.className = 'w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center';
+        }, 3000);
+      } else {
+        throw new Error(response.data.message);
+      }
+    } catch (error) {
+      console.error('Cloning error:', error);
+      log("❌ Error occurred during cloning process", 'error');
+      log(error.response?.data?.message || error.message, 'error');
+      statusText.textContent = 'Failed';
+      statusText.className = 'px-3 py-1 bg-white rounded-lg text-sm font-semibold text-red-600 border border-gray-200';
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-rocket mr-2"></i> Try Again';
+      submitBtn.className = 'w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center';
+    }
+  });
+  // Initialize
+  updateStats();
+</script>

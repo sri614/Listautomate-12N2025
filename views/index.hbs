@@ -1,0 +1,1772 @@
+<div class="header__menu" style="position: relative;">
+
+
+  <h1 style="text-align: center; margin: 10px 0 10px 0; font-size: 28px; font-weight: 500;">
+    <i class="fas fa-list-ul" style="color: #067be1; margin-right: 15px;"></i>List Creator
+  </h1>
+
+  <div class="control-panel" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 18px 20px; background-color: #f8f9fa; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); gap: 20px; width: 100%; box-sizing: border-box;">
+    <input type="text" id="cardSearch" class="control-input" placeholder="🔎 Search lists by brand, campaign, domain..." style="flex: 1; padding: 11px 14px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; background-color: white; transition: all 0.3s ease; height: 42px; box-sizing: border-box;">
+
+    <div style="display: flex; align-items: center; gap: 10px; flex: 0 0 auto;">
+      <label for="globalDatePicker" style="font-weight: 600; color: #333; font-size: 14px; white-space: nowrap;">Set Date:</label>
+      <input type="date" id="globalDatePicker" class="control-input" style="padding: 11px 14px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; background-color: white; height: 42px; box-sizing: border-box;">
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; flex: 0 0 auto;">
+      <label for="daysFilter" style="font-weight: 600; color: #333; font-size: 14px;">Days:</label>
+      <select id="daysFilter" class="control-input" style="padding: 11px 14px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; min-width: 120px; background-color: white; height: 42px; box-sizing: border-box;">
+        <option value="all">All Days</option>
+        <option value="today">Today</option>
+        <option value="t+1">T+1 Days</option>
+        <option value="t+2">T+2 Days</option>
+        <option value="t+3">T+3 Days</option>
+      </select>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; flex: 0 0 auto;">
+      <label for="modeFilter" style="font-weight: 600; color: #333; font-size: 14px; white-space: nowrap;">Mode:</label>
+      <select id="modeFilter" class="control-input" style="padding: 11px 14px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; min-width: 150px; background-color: white; height: 42px; box-sizing: border-box;">
+        <option value="BAU">BAU (Default)</option>
+        <option value="re-engagement">Re-engagement</option>
+        <option value="re-activation">Re-activation</option>
+      </select>
+    </div>
+
+    <button id="openFormBtn" class="control-button" type="button" style="padding: 11px 22px; font-size: 14px; font-weight: 600; border-radius: 6px; background-color: #4A90E2; color: white; border: none; cursor: pointer; transition: all 0.3s; height: 42px; box-sizing: border-box; white-space: nowrap;">Add Lists</button>
+    <button id="runBtn" class="control-button" type="button" style="padding: 11px 22px; font-size: 14px; font-weight: 600; border-radius: 6px; background-color: #4A90E2; color: white; border: none; cursor: pointer; transition: all 0.3s; height: 42px; box-sizing: border-box; white-space: nowrap;">Run Automation</button>
+  </div>
+</div>
+
+<div class="list-info-section" style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px; padding: 8px 14px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 6px; border: 1px solid #dee2e6; position: relative; height: 38px;">
+  <p id="save-status" class="disable" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); margin: 0; font-size: 11px; color: #6b7280; font-style: italic;">Note: drag using the handle...</p>
+
+  <h4 class="emailCount" style="font-size: 16px; font-weight: 600; color: #333; margin: 0; position: absolute; left: 50%; transform: translateX(-50%);">{{emails.length}} Lists</h4>
+
+  <div class="color-legend" style="display: flex; align-items: center; gap: 15px; margin-left: auto;">
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <span style="width: 16px; height: 16px; background: #bbf7d0; border-radius: 50%; display: inline-block; border: 2px solid #86efac;"></span>
+      <span style="font-size: 12px; color: #374151; font-weight: 500;">Main Domain</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <span style="width: 16px; height: 16px; background: #bfdbfe; border-radius: 50%; display: inline-block; border: 2px solid #93c5fd;"></span>
+      <span style="font-size: 12px; color: #374151; font-weight: 500;">P Sub Domain</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <span style="width: 16px; height: 16px; background: #fed7aa; border-radius: 50%; display: inline-block; border: 2px solid #fbbf24;"></span>
+      <span style="font-size: 12px; color: #374151; font-weight: 500;">M Sub Domain</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <span style="width: 16px; height: 16px; background: #d1d5db; border-radius: 50%; display: inline-block; border: 2px solid #9ca3af;"></span>
+      <span style="font-size: 12px; color: #374151; font-weight: 500;">Others</span>
+    </div>
+  </div>
+</div>
+
+{{#if hasEmails}}
+<div class="flex" id="segmentation-list" style="margin-bottom: 50px; display: flex; flex-direction: column; gap: 8px;">
+  {{#each emails}}
+  <div class="card-uniform" data-id="{{this._id}}" data-brand="{{this.brand}}">
+    <div class="drag-handle" title="Drag to reorder">
+      <div class="drag-dots">⋮⋮</div>
+    </div>
+
+    <div class="card-grid">
+      <div class="grid-item brand-section">
+        <div class="field-label">Domain</div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          {{!-- <span class="brand-indicator" style="width: 12px; height: 12px; border-radius: 50%; display: inline-block; border: 2px solid #9ca3af; background: #d1d5db;"></span> --}}
+          <div class="field-value brand-text">{{this.brand}}</div>
+        </div>
+      </div>
+
+      <div class="grid-item campaign-section">
+        <div class="field-label">Campaign</div>
+        <div class="field-value campaign-text">{{this.campaign}}</div>
+      </div>
+
+      <div class="grid-item domain-section">
+        <div class="field-label">Tier</div>
+        <div class="field-value">{{this.domain}}</div>
+      </div>
+
+      <div class="grid-item count-section">
+        <div class="field-label">Count</div>
+        <div class="field-value">{{this.count}}</div>
+      </div>
+
+      <div class="grid-item date-section">
+        <div class="field-label">Date</div>
+        <div class="date-highlight">
+          <span class="js-date" data-iso="{{this.date}}"></span>
+        </div>
+      </div>
+
+      <div class="grid-item primary-section">
+        <div class="field-label">Primary</div>
+        <div class="field-value">{{this.primaryListId}}</div>
+      </div>
+
+      <div class="grid-item secondary-section">
+        <div class="field-label">Secondary</div>
+        <div class="field-value">{{this.secondaryListId}}</div>
+      </div>
+
+      <div class="grid-item contacts-section">
+        <div class="field-label">Sent Contacts</div>
+        <div class="field-value">{{this.sendContactListId}}</div>
+      </div>
+
+      <div class="grid-item actions-section">
+        <div class="edit-date-info" data-date="{{this.createdAt}}"></div>
+        <div class="action-buttons">
+          <button class="edit-btn" title="Edit" data-id="{{this._id}}" data-campaign="{{this.campaign}}"
+            data-brand="{{this.brand}}" data-count="{{this.count}}" data-primary-list-id="{{this.primaryListId}}"
+            data-secondary-list-id="{{this.secondaryListId}}" data-send-contact-list-id="{{this.sendContactListId}}"
+            data-domain="{{this.domain}}" data-date="{{this.date}}"
+            data-last-marketing-email-sent-brand="{{this.lastMarketingEmailSentBrand}}">
+            <img src="/assets/edit-svgrepo-com.svg" width="16" height="16">
+          </button>
+          <form action="/email/{{this._id}}?_method=DELETE" method="post" style="display: inline;">
+            <button type="button" class="delete-btn" onclick="event.preventDefault(); showConfirm('Are you sure you want to delete this list?', (confirmed) => { if(confirmed) this.closest('form').submit(); }, 'Delete List')" title="Delete">
+              <img src="/assets/delete-svgrepo-com.svg" width="16" height="16">
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{/each}}
+</div>
+{{else}}
+<h3>No Emails</h3>
+{{/if}}
+
+<!-- Modal -->
+<div id="emailModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+  <div class="modal-content">
+    <span id="closeModal" class="close" aria-label="Close">&times;</span>
+    <form action="/add-email" method="POST" id="emailForm">
+      <h2>List Details</h2>
+      <label for="campaign">Campaign:</label>
+      <input type="text" id="campaign" name="campaign" required />
+
+      <label for="brand">Brand:</label>
+      <input type="text" id="brand" name="brand" required />
+
+      <label for="count">Count:</label>
+      <input type="number" id="count" name="count" required />
+
+      <label for="primaryListId">Primary ILS List ID:</label>
+      <input type="number" id="primaryListId" name="primaryListId" required />
+
+      <label for="secondaryListId">Secondary ILS List ID:</label>
+      <input type="number" id="secondaryListId" name="secondaryListId" />
+
+      <label for="sendContactListId">Sent Contacts ILS List ID:</label>
+      <input type="number" id="sendContactListId" name="sendContactListId" required />
+
+      <label for="domain">Domain:</label>
+      <select id="domain" name="domain" required>
+        <option value="" disabled selected>Select a domain</option>
+        <option value="Tier 1">Tier 1</option>
+        <option value="Tier 2">Tier 2</option>
+        <option value="Tier 3">Tier 3</option>
+        <option value="Tier 4">Tier 4</option>
+        <option value="Tier 0A">Tier 0A</option>
+        <option value="Tier 0B">Tier 0B</option>
+        <option value="Tier 0C">Tier 0C</option>
+      </select>
+
+      <label for="date">Date:</label>
+      <input type="date" id="date" name="date" required />
+
+      <label for="lastMarketingEmailSentBrand">Last Marketing Email sent Brand:</label>
+      <select id="lastMarketingEmailSentBrand" name="lastMarketingEmailSentBrand" required>
+        <option value="" disabled selected>Loading brands...</option>
+      </select>
+
+      <button id="form-btn" type="submit">Submit</button>
+    </form>
+  </div>
+</div>
+
+<div class="flex-bn mb-12" style="background-color: rgb(234, 234, 234);padding:8px 10px;border-radius:4px">
+  <h2 style="margin-bottom: 0;">Created Lists (Today)</h2>
+  <div style="display: flex;gap:20px;">
+    <input class="searchInput" type="search" name="listSearch" id="listSearch" placeholder="search here">
+    <button class="btn-primary" style="white-space:nowrap;width: 200px;" id="reload-btn">View all</button>
+  </div>
+</div>
+<h4 class="emailCount mb-12" id="list-count">{{lists.length}} Lists</h4>
+
+{{#if hasLists}}
+<div class="created-lists" style="height:400px;overflow-y:scroll;position:relative">
+  <div class="list flex-bn sticky">
+    <p class="heading"><strong>List id: </strong></p>
+    <p class="heading"><strong>List Name: </strong></p>
+    <p class="heading"><strong>Created date: </strong></p>
+  </div>
+  <ol id="list-container">
+    {{#each lists}}
+    <li style="margin-bottom: 20px;">
+      <div class="list flex-bn">
+        <p class="list-id">{{this.listId}}</p>
+        <p class="list-name">{{this.name}} <a
+            href="https://app.hubspot.com/contacts/5686032/objectLists/views/all?query={{this.name}}"
+            target="_blank">View list</a></p>
+        <p class="list-date"><span class="list-date-span" data-iso="{{this.createdDate}}"> {{this.createdDate}}</span>
+        </p>
+      </div>
+    </li>
+    {{/each}}
+  </ol>
+</div>
+{{else}}
+<h3>No Lists created Today</h3>
+{{/if}}
+
+<!-- Custom Dialog Box -->
+<div id="customDialog" class="custom-dialog-overlay" style="display: none;">
+  <div class="custom-dialog">
+    <div class="custom-dialog-header">
+      <h3 id="dialogTitle">Notification</h3>
+      <button class="custom-dialog-close" onclick="closeDialog()">&times;</button>
+    </div>
+    <div class="custom-dialog-body">
+      <div id="dialogIcon" class="dialog-icon"></div>
+      <p id="dialogMessage">Message goes here</p>
+    </div>
+    <div class="custom-dialog-footer">
+      <button id="dialogConfirmBtn" class="dialog-btn dialog-btn-primary" onclick="closeDialog()">OK</button>
+      <button id="dialogCancelBtn" class="dialog-btn dialog-btn-secondary" onclick="closeDialog()" style="display: none;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Custom Dialog Styles */
+.custom-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  cursor: not-allowed;
+}
+
+.custom-dialog-overlay.show {
+  opacity: 1;
+}
+
+.custom-dialog {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 450px;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+  animation: dialogSlideIn 0.3s ease forwards;
+  cursor: default;
+}
+
+@keyframes dialogSlideIn {
+  from {
+    transform: translateY(-30px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.custom-dialog-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.custom-dialog-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.custom-dialog-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.custom-dialog-close:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.custom-dialog-body {
+  padding: 24px;
+  text-align: center;
+}
+
+.dialog-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.dialog-icon.success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.dialog-icon.success::before {
+  content: "✓";
+}
+
+.dialog-icon.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.dialog-icon.error::before {
+  content: "✕";
+}
+
+.dialog-icon.warning {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+.dialog-icon.warning::before {
+  content: "!";
+}
+
+.dialog-icon.info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.dialog-icon.info::before {
+  content: "i";
+  font-weight: bold;
+  font-style: italic;
+}
+
+#dialogMessage {
+  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.custom-dialog-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.dialog-btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  outline: none;
+}
+
+.dialog-btn-primary {
+  background: #1654a0;
+  color: white;
+}
+
+.dialog-btn-primary:hover {
+  background: #1e5ba8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 84, 160, 0.3);
+}
+
+.dialog-btn-secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.dialog-btn-secondary:hover {
+  background: #d1d5db;
+}
+
+/* Confirm dialog specific styles */
+.confirm-dialog .custom-dialog-body {
+  text-align: left;
+}
+
+.confirm-dialog .dialog-icon {
+  margin: 0 auto 16px;
+}
+</style>
+
+<script>
+  // Custom Dialog Functions
+  let dialogCallback = null;
+
+  function showDialog(message, type = 'info', title = null) {
+    const dialog = document.getElementById('customDialog');
+    const dialogTitle = document.getElementById('dialogTitle');
+    const dialogMessage = document.getElementById('dialogMessage');
+    const dialogIcon = document.getElementById('dialogIcon');
+    const confirmBtn = document.getElementById('dialogConfirmBtn');
+    const cancelBtn = document.getElementById('dialogCancelBtn');
+
+    // Set title
+    dialogTitle.textContent = title || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : type === 'warning' ? 'Warning' : 'Information');
+
+    // Set message
+    dialogMessage.innerHTML = message.replace(/\n/g, '<br>');
+
+    // Set icon type
+    dialogIcon.className = 'dialog-icon ' + type;
+
+    // Hide cancel button for notifications
+    cancelBtn.style.display = 'none';
+    confirmBtn.textContent = 'OK';
+
+    // Show dialog
+    dialog.style.display = 'flex';
+    setTimeout(() => dialog.classList.add('show'), 10);
+  }
+
+  function showConfirm(message, callback, title = 'Confirm') {
+    const dialog = document.getElementById('customDialog');
+    const dialogTitle = document.getElementById('dialogTitle');
+    const dialogMessage = document.getElementById('dialogMessage');
+    const dialogIcon = document.getElementById('dialogIcon');
+    const confirmBtn = document.getElementById('dialogConfirmBtn');
+    const cancelBtn = document.getElementById('dialogCancelBtn');
+
+    // Set title
+    dialogTitle.textContent = title;
+
+    // Set message
+    dialogMessage.innerHTML = message.replace(/\n/g, '<br>');
+
+    // Set icon type
+    dialogIcon.className = 'dialog-icon warning';
+
+    // Show both buttons
+    cancelBtn.style.display = 'inline-block';
+    confirmBtn.textContent = 'Confirm';
+
+    // Set callback
+    dialogCallback = callback;
+
+    // Update confirm button onclick
+    confirmBtn.onclick = function() {
+      closeDialog();
+      if (dialogCallback) {
+        dialogCallback(true);
+        dialogCallback = null;
+      }
+    };
+
+    // Update cancel button onclick
+    cancelBtn.onclick = function() {
+      closeDialog();
+      if (dialogCallback) {
+        dialogCallback(false);
+        dialogCallback = null;
+      }
+    };
+
+    // Show dialog
+    dialog.style.display = 'flex';
+    setTimeout(() => dialog.classList.add('show'), 10);
+  }
+
+  function closeDialog() {
+    const dialog = document.getElementById('customDialog');
+    dialog.classList.remove('show');
+    setTimeout(() => {
+      dialog.style.display = 'none';
+      dialogCallback = null;
+    }, 300);
+  }
+
+  // Prevent closing dialog on overlay click - only allow closing via buttons
+  document.addEventListener('DOMContentLoaded', function() {
+    const dialog = document.getElementById('customDialog');
+    // Remove the overlay click listener - dialog can only be closed via buttons
+    dialog.addEventListener('click', function(e) {
+      e.stopPropagation(); // Prevent any click propagation
+    });
+  });
+
+  // 🔄 Reusable Drag-and-Drop SortableJS
+  function initDragAndDrop() {
+    const list = document.getElementById('segmentation-list');
+    const status = document.getElementById('save-status');
+
+    if (!list || !window.Sortable) return;
+
+    new Sortable(list, {
+      handle: '.drag-handle',
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      dragClass: 'drag-active',
+      preventOnFilter: false,
+      onStart: function(evt) {
+        // Ensure dragging only starts from handle
+        if (!evt.originalEvent.target.closest('.drag-handle')) {
+          return false;
+        }
+      },
+      onEnd: async () => {
+        const ids = [...list.querySelectorAll('.card-uniform')].map(el => el.dataset.id);
+        try {
+          const res = await fetch('/api/segmentations/reorder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderedIds: ids })
+          });
+
+          const result = await res.json();
+          if (result.success) {
+            status.textContent = "Order saved!";
+            status.classList.add("save-status");
+            status.classList.remove("disable");
+            setTimeout(() => status.textContent = "", 1500);
+          } else {
+            status.textContent = "Failed to save order.";
+          }
+        } catch (err) {
+          console.error("Reorder Error:", err);
+          status.textContent = "Server error.";
+        }
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    initDragAndDrop(); // Initialize drag and drop
+
+    // Prevent dragging when clicking outside of drag handle
+    document.addEventListener('mousedown', function(e) {
+      const card = e.target.closest('.card-uniform');
+      const dragHandle = e.target.closest('.drag-handle');
+
+      if (card && !dragHandle) {
+        e.preventDefault();
+        card.draggable = false;
+      } else if (dragHandle) {
+        const parentCard = dragHandle.closest('.card-uniform');
+        if (parentCard) {
+          parentCard.draggable = true;
+        }
+      }
+    });
+
+    // Global date picker functionality
+    const globalDatePicker = document.getElementById('globalDatePicker');
+    if (globalDatePicker) {
+      globalDatePicker.addEventListener('change', async function() {
+        const newDate = this.value;
+        if (!newDate) return;
+
+        // Get current filter values
+        const modeFilter = document.getElementById('modeFilter');
+        const selectedMode = modeFilter ? modeFilter.value.toLowerCase() : 'bau';
+
+        // Get only visible cards (respecting current filters)
+        const visibleCards = document.querySelectorAll('.card-uniform[style="display: block;"], .card-uniform:not([style])');
+
+        if (visibleCards.length === 0) {
+          showDialog('No lists are currently visible to update.', 'warning');
+          this.value = '';
+          return;
+        }
+
+        // Build confirmation message based on active filter
+        let filterDescription = '';
+        if (selectedMode === 're-engagement') {
+          filterDescription = ' (Re-engagement lists only)';
+        } else if (selectedMode === 're-activation') {
+          filterDescription = ' (Re-activation lists only)';
+        } else if (selectedMode === 'bau') {
+          filterDescription = ' (BAU lists only)';
+        }
+
+        const datePickerElement = this;
+        showConfirm(
+          `Are you sure you want to update <strong>${visibleCards.length}</strong> visible list dates<strong>${filterDescription}</strong> to <strong>${newDate}</strong>?`,
+          (confirmed) => {
+            if (!confirmed) {
+              datePickerElement.value = '';
+              return;
+            }
+            // Continue with the update process
+            updateListDates();
+          },
+          'Update List Dates'
+        );
+
+        async function updateListDates() {
+
+        const updatePromises = [];
+        let updatedCount = 0;
+
+        visibleCards.forEach(card => {
+          // Double-check the card matches the current mode filter
+          const campaignElement = card.querySelector('.campaign-text');
+          const cardCampaign = campaignElement ? campaignElement.textContent.toLowerCase() : '';
+
+          let shouldUpdate = false;
+          if (selectedMode === 'bau') {
+            shouldUpdate = !cardCampaign.includes('re-engagement') && !cardCampaign.includes('re-activation');
+          } else {
+            shouldUpdate = cardCampaign.includes(selectedMode);
+          }
+
+          if (shouldUpdate) {
+            const cardId = card.dataset.id;
+            const dateElement = card.querySelector('.js-date');
+            const editBtn = card.querySelector('.edit-btn');
+
+            // Ensure we're using the correct ISO format for all operations
+            const dateObj = new Date(newDate);
+            const isoDateString = dateObj.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
+            // Update visual display immediately with consistent formatting
+            if (dateElement) {
+              dateElement.dataset.iso = isoDateString;
+
+              const day = dateObj.getDate();
+              const month = dateObj.toLocaleString('en-US', { month: 'short' });
+              const year = dateObj.getFullYear();
+              dateElement.textContent = `${day} ${month} ${year}`;
+            }
+
+            // Also update the edit button's data-date attribute with consistent format
+            if (editBtn) {
+              editBtn.dataset.date = isoDateString;
+            }
+
+            // Prepare update request with proper error handling
+            updatePromises.push(
+              fetch(`/email/${cardId}/update-date`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: isoDateString })
+              }).then(response => {
+                if (!response.ok) {
+                  if (response.status === 401) {
+                    throw new Error('Authentication required. Please log in.');
+                  }
+                  throw new Error(`Update failed: ${response.statusText}`);
+                }
+                return response.json();
+              }).then(data => {
+                console.log(`Date updated successfully for ${cardId}:`, data);
+                return data;
+              })
+            );
+
+            updatedCount++;
+          }
+        });
+
+          // Send all update requests
+          if (updatePromises.length > 0) {
+            try {
+              await Promise.all(updatePromises);
+              showDialog(
+                `Successfully updated <strong>${updatedCount}</strong> ${selectedMode.toUpperCase()} list dates to <strong>${newDate}</strong>`,
+                'success',
+                'Dates Updated Successfully'
+              );
+
+              // Re-apply filters after date update
+              if (typeof applyFilters === 'function') {
+                applyFilters();
+              }
+            } catch (error) {
+              console.error('Error updating dates:', error);
+              showDialog('Some dates could not be updated. Please refresh the page.', 'error', 'Update Failed');
+            }
+          } else {
+            showDialog('No lists matched the current filter criteria.', 'info');
+          }
+
+          // Clear the date picker
+          datePickerElement.value = '';
+        }
+      });
+    }
+
+    // Format dates with consistent formatting
+    document.querySelectorAll(".js-date").forEach(el => {
+      const isoValue = el.dataset.iso;
+
+      if (!isoValue || isoValue === 'undefined' || isoValue === 'null') {
+        el.textContent = 'No date';
+        return;
+      }
+
+      const date = new Date(isoValue);
+      if (isNaN(date.getTime())) {
+        el.textContent = 'Invalid date';
+        return;
+      }
+
+      const day = date.getDate();
+      const month = date.toLocaleString('en-US', { month: 'short' });
+      const year = date.getFullYear();
+      el.textContent = `${day} ${month} ${year}`;
+    });
+
+    document.querySelectorAll(".list-date-span").forEach(el => {
+      const iso = el.getAttribute("data-iso");
+      if (!iso) return;
+      const d = new Date(iso);
+      const day = d.getDate();
+      const month = d.toLocaleString('en-US', { month: 'short' });
+      const year = d.getFullYear();
+      let hours = d.getHours();
+      const minutes = d.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      el.textContent = `${day} ${month} ${year} ${hours}:${minutes}${ampm}`;
+    });
+
+    document.querySelectorAll(".edit-date-info").forEach(el => {
+      const date = new Date(el.dataset.date);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = String(date.getFullYear()).slice(-2);
+      let hours = date.getHours();
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'pm' : 'am';
+      hours = hours % 12 || 12;
+      el.textContent = `${day}.${month}.${year} ${hours}.${minutes} ${ampm}`;
+    });
+
+    // Campaign text truncation removed - handled by CSS
+
+    // Modal edit form population
+    const popupForm = document.getElementById("emailModal");
+    const form = document.getElementById("emailForm");
+    const formBtn = document.getElementById("form-btn");
+    const campaignInput = document.getElementById("campaign");
+    const brandInput = document.getElementById("brand");
+    const countInput = document.getElementById("count");
+    const primaryListIdInput = document.getElementById("primaryListId");
+    const secondaryListIdInput = document.getElementById("secondaryListId");
+    const sendContactListIdInput = document.getElementById("sendContactListId");
+    const domainInput = document.getElementById("domain");
+    const dateInput = document.getElementById("date");
+    const lastMarketingEmailSentBrandInput = document.getElementById("lastMarketingEmailSentBrand");
+
+    // Fetch HubSpot brand options
+    async function loadBrandOptions() {
+      try {
+        const response = await fetch('/api/hubspot-brand-options');
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.warn('Authentication required for brand options');
+            lastMarketingEmailSentBrandInput.innerHTML = '<option value="" disabled selected>Please login to load brands</option>';
+            return;
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.options) {
+          lastMarketingEmailSentBrandInput.innerHTML = '<option value="" disabled selected>Select a brand</option>';
+          data.options.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option.value;
+            optionElement.textContent = option.label;
+            lastMarketingEmailSentBrandInput.appendChild(optionElement);
+          });
+        } else {
+          lastMarketingEmailSentBrandInput.innerHTML = '<option value="" disabled selected>Failed to load brands</option>';
+        }
+      } catch (error) {
+        console.error('Error loading brand options:', error);
+        lastMarketingEmailSentBrandInput.innerHTML = '<option value="" disabled selected>Error loading brands</option>';
+      }
+    }
+
+    // Load brand options when the modal is opened
+    document.getElementById("openFormBtn").addEventListener("click", () => {
+      loadBrandOptions();
+    });
+
+    document.querySelectorAll(".edit-btn").forEach(button => {
+      button.addEventListener("click", async () => {
+        form.action = `/email/${button.dataset.id}/edit?_method=PUT`;
+        formBtn.textContent = "Update";
+        campaignInput.value = button.dataset.campaign;
+        brandInput.value = button.dataset.brand;
+        countInput.value = button.dataset.count;
+        primaryListIdInput.value = button.dataset.primaryListId;
+        secondaryListIdInput.value = button.dataset.secondaryListId;
+        sendContactListIdInput.value = button.dataset.sendContactListId;
+        domainInput.value = button.dataset.domain;
+        dateInput.value = button.dataset.date;
+
+        // Load brand options and set the value
+        await loadBrandOptions();
+        if (button.dataset.lastMarketingEmailSentBrand) {
+          lastMarketingEmailSentBrandInput.value = button.dataset.lastMarketingEmailSentBrand;
+        }
+
+        popupForm.style.display = "block";
+      });
+    });
+
+    // Filters and Search
+    const emailCards = document.querySelectorAll('.card-uniform');
+    const daysFilter = document.getElementById('daysFilter');
+    const modeFilter = document.getElementById('modeFilter');
+    const cardSearch = document.getElementById('cardSearch');
+
+    // Load saved filter values from localStorage
+    const savedDaysFilter = localStorage.getItem('daysFilter');
+    const savedModeFilter = localStorage.getItem('modeFilter');
+
+    // Set the saved values if they exist
+    if (savedDaysFilter && daysFilter) {
+      daysFilter.value = savedDaysFilter;
+    }
+    if (savedModeFilter && modeFilter) {
+      modeFilter.value = savedModeFilter;
+    }
+
+    // Apply filters with the restored values on page load
+    if (daysFilter && modeFilter) {
+      setTimeout(() => {
+        applyFilters();
+      }, 100);
+    }
+
+    // Save filter values to localStorage on change
+    [daysFilter, modeFilter].forEach(filter => {
+      filter.addEventListener('change', function() {
+        // Save the current filter values to localStorage
+        if (daysFilter) {
+          localStorage.setItem('daysFilter', daysFilter.value);
+        }
+        if (modeFilter) {
+          localStorage.setItem('modeFilter', modeFilter.value);
+        }
+        applyFilters();
+      });
+    });
+
+    // Instant search functionality
+    cardSearch.addEventListener('input', function() {
+      applyFilters();
+    });
+
+    function applyFilters() {
+      const selectedDay = daysFilter.value;
+      const selectedMode = modeFilter.value.toLowerCase();
+      const searchTerm = cardSearch.value.toLowerCase().trim();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      emailCards.forEach(card => {
+        const dateElement = card.querySelector('.js-date');
+        const cardDate = new Date(dateElement.dataset.iso);
+        cardDate.setHours(0, 0, 0, 0);
+        const campaignElement = card.querySelector('.campaign-text');
+        const cardCampaign = campaignElement.textContent.toLowerCase();
+        const brandElement = card.querySelector('.brand-text');
+        const cardBrand = brandElement.textContent.toLowerCase();
+        const domainElement = card.querySelector('.domain-section .field-value');
+        const cardDomain = domainElement.textContent.toLowerCase();
+
+        // day match
+        let dayMatch = true;
+        if (selectedDay !== 'all') {
+          const compareDate = new Date(today);
+          if (selectedDay.startsWith('t+')) {
+            compareDate.setDate(today.getDate() + parseInt(selectedDay.slice(2)));
+          }
+          dayMatch = cardDate.getTime() === compareDate.getTime();
+        }
+
+        // mode match
+        let modeMatch = true;
+        if (selectedMode !== 'bau') {
+          modeMatch = cardCampaign.includes(selectedMode);
+        } else {
+          modeMatch = !cardCampaign.includes('re-engagement') && !cardCampaign.includes('re-activation');
+        }
+
+        // search match
+        let searchMatch = true;
+        if (searchTerm) {
+          searchMatch = cardBrand.includes(searchTerm) ||
+                       cardCampaign.includes(searchTerm) ||
+                       cardDomain.includes(searchTerm);
+        }
+
+        card.style.display = (dayMatch && modeMatch && searchMatch) ? 'block' : 'none';
+      });
+
+      // update count
+      const visibleCards = [...document.querySelectorAll('.card-uniform[style="display: block;"], .card-uniform:not([style])')].filter(card => {
+        return card.style.display !== 'none';
+      });
+      document.querySelector('h4.emailCount').textContent = `${visibleCards.length} Lists`;
+    }
+
+    applyFilters(); // apply on load
+
+    // Run Automation Button
+    document.getElementById('runBtn').addEventListener('click', async () => {
+      const runBtn = document.getElementById('runBtn');
+      const originalText = runBtn.textContent;
+
+      try {
+        runBtn.disabled = true;
+        runBtn.textContent = 'Processing...';
+        const daysFilter = document.getElementById('daysFilter').value;
+        const modeFilter = document.getElementById('modeFilter').value;
+
+        const response = await fetch('/api/create-lists', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ daysFilter, modeFilter })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error(`No campaigns found for:<br>• Date: ${daysFilter.replace('t+', 'T+')}<br>• Mode: ${modeFilter}`);
+          }
+          throw new Error(result.error || 'Failed to create lists');
+        }
+
+        showDialog(`Successfully processed <strong>${result.count}</strong> campaigns matching:<br>• Date: <strong>${daysFilter.replace('t+', 'T+')}</strong><br>• Mode: <strong>${modeFilter}</strong>`, 'success', 'Automation Complete');
+      } catch (error) {
+        showDialog(error.message, 'error', 'Automation Failed');
+      } finally {
+        runBtn.disabled = false;
+        runBtn.textContent = originalText;
+      }
+    });
+
+    // Search functionality
+    let searchOn = false;
+    let query = "";
+    const searchInput = document.getElementById("listSearch");
+    const reloadBtn = document.getElementById("reload-btn");
+
+    searchInput.addEventListener("input", (e) => {
+      query = e.target.value.trim().toLowerCase();
+      searchOn = query.length > 0;
+      reloadBtn.textContent = searchOn ? "Search" : "View all";
+    });
+
+    reloadBtn.addEventListener("click", async () => {
+      try {
+        const response = await fetch("/api/created-lists");
+        let data = await response.json();
+        const container = document.getElementById("list-container");
+        container.innerHTML = "";
+
+        if (searchOn) {
+          const words = query.trim().split(/\s+/);
+          data = data.filter(item => words.every(word => new RegExp(word, 'i').test(item.name)));
+        }
+
+        if (data.length === 0) {
+          container.innerHTML = "<p>No matching lists found.</p>";
+          document.getElementById("list-count").textContent = "0 Lists";
+          return;
+        }
+
+        document.getElementById("list-count").textContent = `${data.length} Lists`;
+        data.forEach(item => {
+          const d = new Date(item.createdDate);
+          const day = d.getDate();
+          const month = d.toLocaleString('en-US', { month: 'short' });
+          const year = d.getFullYear();
+          let hours = d.getHours();
+          const minutes = d.getMinutes().toString().padStart(2, '0');
+          const ampm = hours >= 12 ? 'PM' : 'AM';
+          hours = hours % 12 || 12;
+
+          container.innerHTML += `
+            <li style="margin-bottom: 20px;">
+              <div class="list flex-bn">
+                <p class="list-id">${item.listId}</p>
+                <p class="list-name">${item.name} <a href="https://app.hubspot.com/contacts/5686032/objectLists/views/all?query=${item.name}" target="_blank">View list</a></p>
+                <p class="list-date">${day} ${month} ${year} ${hours}:${minutes}${ampm}</p>
+              </div>
+            </li>`;
+        });
+      } catch (error) {
+        console.error("Failed to reload lists:", error);
+        document.getElementById("list-container").innerHTML = "<p>Error loading lists.</p>";
+      }
+    });
+  });
+</script>
+
+<style>
+  /* Control Panel Uniform Styles */
+  .control-panel {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .control-input:focus,
+  .control-button:focus {
+    outline: none !important;
+    border-color: #e0e0e0 !important;
+    box-shadow: none !important;
+  }
+
+  .control-input:hover {
+    border-color: #93c5fd !important;
+  }
+
+  .control-button:hover {
+    background-color: #3b82f6 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(6, 123, 225, 0.3);
+  }
+
+  .control-button:active {
+    transform: translateY(0);
+  }
+
+  /* Ensure all control elements have same height */
+  .control-panel input,
+  .control-panel select,
+  .control-panel button {
+    height: 42px;
+    box-sizing: border-box;
+  }
+
+  /* Uniform Grid Card Layout */
+  #segmentation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  .card-uniform {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  .card-uniform:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  /* Main Domain styling - Light Green */
+  .card-uniform[data-brand*="main domain" i] {
+    border-left: 5px solid #bbf7d0;
+  }
+
+  .card-uniform[data-brand*="main domain" i] .drag-handle {
+    background: #bbf7d0;
+  }
+
+  .card-uniform[data-brand*="main domain" i]:hover .drag-handle {
+    background: #86efac;
+  }
+
+  .card-uniform[data-brand*="main domain" i] .brand-indicator {
+    background: #bbf7d0;
+    border-color: #86efac;
+  }
+
+  /* P Sub Domain styling - Light Blue */
+  .card-uniform[data-brand*="p sub domain" i] {
+    border-left: 5px solid #bfdbfe;
+  }
+
+  .card-uniform[data-brand*="p sub domain" i] .drag-handle {
+    background: #bfdbfe;
+  }
+
+  .card-uniform[data-brand*="p sub domain" i]:hover .drag-handle {
+    background: #93c5fd;
+  }
+
+  .card-uniform[data-brand*="p sub domain" i] .brand-indicator {
+    background: #bfdbfe;
+    border-color: #93c5fd;
+  }
+
+  /* M Sub Domain styling - Light Amber */
+  .card-uniform[data-brand*="m sub domain" i] {
+    border-left: 5px solid #fed7aa;
+  }
+
+  .card-uniform[data-brand*="m sub domain" i] .drag-handle {
+    background: #fed7aa;
+  }
+
+  .card-uniform[data-brand*="m sub domain" i]:hover .drag-handle {
+    background: #fbbf24;
+  }
+
+  .card-uniform[data-brand*="m sub domain" i] .brand-indicator {
+    background: #fed7aa;
+    border-color: #fbbf24;
+  }
+
+  .drag-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #d1d5db;
+    cursor: grab;
+    transition: all 0.3s ease;
+    z-index: 10;
+    border-radius: 0;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+    opacity: 0.8;
+  }
+
+  .drag-dots {
+    color: #4b5563;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 0.8;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(90deg);
+    transition: color 0.3s ease;
+    letter-spacing: 2px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 1.2fr 0.8fr 1.2fr 1fr 1fr 1.2fr 1fr;
+    gap: 15px;
+    padding: 16px 20px 16px 35px;
+    align-items: center;
+    width: 100%;
+  }
+
+  .grid-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .field-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #5a5a5a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+
+  .field-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    word-wrap: break-word;
+    line-height: 1.3;
+  }
+
+  .brand-text {
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .campaign-text {
+    color: #374151;
+    font-weight: 500;
+    font-size: 13px;
+  }
+
+  .date-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .date-section .field-label {
+    margin-bottom: 6px;
+  }
+
+  .date-highlight {
+    background: linear-gradient(135deg, #067be1 0%, #3b82f6 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(6, 123, 225, 0.3);
+    white-space: nowrap;
+    display: inline-block;
+  }
+
+  .actions-section {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .edit-date-info {
+    font-size: 9px;
+    color: #9ca3af;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .edit-btn, .delete-btn {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .edit-btn:hover {
+    background: #e5f3ff;
+    border-color: #067be1;
+    transform: scale(1.05);
+  }
+
+  .delete-btn:hover {
+    background: #fee2e2;
+    border-color: #f87171;
+    transform: scale(1.05);
+  }
+
+  /* Enhanced interactions and micro-animations */
+  .control-panel {
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  .control-panel:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+    transform: translateY(-1px);
+  }
+
+
+  .card .btns button {
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card .btns button:hover {
+    transform: scale(1.1);
+  }
+
+  .card .btns button:active {
+    transform: scale(0.95);
+  }
+
+  /* Enhanced filter animations */
+  .filter-dropdown select {
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  .filter-dropdown select:hover {
+    border-color: #067be1;
+    box-shadow: 0 2px 8px rgba(6, 123, 225, 0.15);
+  }
+
+  /* Smooth list animations */
+  .created-lists {
+    scroll-behavior: smooth;
+  }
+
+  .list.flex-bn {
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  .list.flex-bn:hover:not(.sticky) {
+    background-color: rgba(6, 123, 225, 0.05);
+    transform: translateX(5px);
+  }
+
+  /* Enhanced modal interactions */
+  #emailModal {
+    backdrop-filter: blur(8px);
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  #emailModal input:focus,
+  #emailModal select:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Floating action feedback */
+  #save-status {
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform: translateZ(0);
+  }
+
+  #save-status.save-status {
+    animation: statusPulse 0.6s ease-out;
+  }
+
+  @keyframes statusPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  /* Enhanced search interactions */
+  .searchInput {
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  .searchInput:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Smooth button loading states */
+  .btn-primary.loading {
+    animation: buttonPulse 1.5s infinite;
+  }
+
+  @keyframes buttonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* Enhanced drag feedback */
+  .sortable-ghost {
+    opacity: 0.4;
+  }
+
+  .sortable-chosen {
+    opacity: 1;
+  }
+
+  .drag-active {
+    opacity: 0.5;
+  }
+
+  /* Smooth dialog animations */
+  .custom-dialog-overlay {
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  .custom-dialog {
+    animation: dialogBounceIn 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  @keyframes dialogBounceIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(-50px);
+    }
+    80% {
+      opacity: 1;
+      transform: scale(1.05) translateY(0);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Mobile Responsive Styles for Grid Cards */
+  @media (max-width: 768px) {
+    .control-panel {
+      flex-direction: column !important;
+      gap: 10px !important;
+      padding: 15px !important;
+    }
+
+    .control-panel > * {
+      width: 100% !important;
+      max-width: none !important;
+    }
+
+    .control-panel > div {
+      flex-direction: row !important;
+      justify-content: space-between;
+    }
+
+    .control-panel label {
+      display: block;
+      margin-bottom: 5px;
+      width: 100%;
+    }
+
+    .control-panel input[type="date"],
+    .control-panel select {
+      width: 100% !important;
+      min-width: unset !important;
+    }
+
+    .control-panel button {
+      width: 100% !important;
+      margin-top: 5px;
+    }
+
+    /* Control inputs responsive */
+    .control-input,
+    .control-button {
+      width: 100% !important;
+      max-width: none !important;
+    }
+
+    /* Color legend responsive */
+    .list-info-section {
+      flex-direction: column !important;
+      gap: 15px !important;
+      align-items: flex-start !important;
+    }
+
+    .color-legend {
+      flex-wrap: wrap !important;
+      gap: 12px !important;
+    }
+
+    /* Card grid responsive layout */
+    .drag-handle {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: auto !important;
+      width: 100% !important;
+      height: 35px !important;
+      border-radius: 8px 8px 0 0 !important;
+      border-right: none !important;
+      border-bottom: 1px solid rgba(229, 231, 235, 0.5) !important;
+    }
+
+    /* Mobile brand-based colors - Light shades */
+    .card-uniform[data-brand*="main domain" i] .drag-handle {
+      background: #bbf7d0 !important;
+    }
+
+    .card-uniform[data-brand*="p sub domain" i] .drag-handle {
+      background: #bfdbfe !important;
+    }
+
+    .card-uniform[data-brand*="m sub domain" i] .drag-handle {
+      background: #fed7aa !important;
+    }
+
+    .drag-dots {
+      transform: rotate(0deg) !important;
+      writing-mode: horizontal-tb !important;
+      font-size: 16px !important;
+      letter-spacing: 4px !important;
+    }
+
+    .card-grid {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 12px !important;
+      padding: 45px 15px 15px 15px !important;
+    }
+
+    .grid-item {
+      padding: 8px !important;
+      background: #f9fafb !important;
+      border-radius: 6px !important;
+      border: 1px solid #e5e7eb !important;
+    }
+
+    .date-section {
+      grid-column: 1 / -1 !important;
+    }
+
+    .actions-section {
+      grid-column: 1 / -1 !important;
+      margin-top: 10px !important;
+    }
+
+    /* Modal responsive */
+    #emailModal .modal-content {
+      width: 95% !important;
+      max-width: none !important;
+      margin: 10px !important;
+      padding: 20px !important;
+    }
+
+    #emailModal input,
+    #emailModal select {
+      width: 100% !important;
+      font-size: 16px !important;
+    }
+
+    /* List section responsive */
+    .created-lists {
+      height: 300px !important;
+    }
+
+    .list.flex-bn {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 10px !important;
+      padding: 10px !important;
+    }
+
+    .list p {
+      width: 100% !important;
+      font-size: 14px !important;
+    }
+
+    /* Filter dropdown responsive */
+    .filter-dropdown {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 5px;
+    }
+
+    .filter-dropdown label {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+
+    .filter-dropdown select {
+      width: 100% !important;
+    }
+
+    /* Save status position on mobile */
+    #save-status {
+      position: fixed !important;
+      top: 70px !important;
+      left: 10px !important;
+      right: 10px !important;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 5px;
+      border-radius: 5px;
+      z-index: 100;
+    }
+
+    /* Dialog responsive */
+    .custom-dialog {
+      width: 95% !important;
+      max-width: none !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .header__menu h1 {
+      font-size: 22px !important;
+    }
+
+    .header__menu h1 i {
+      font-size: 20px !important;
+      margin-right: 8px !important;
+    }
+
+    .control-panel {
+      padding: 10px !important;
+    }
+
+    .card-uniform {
+      margin-bottom: 10px !important;
+    }
+
+    .card-grid {
+      grid-template-columns: 1fr !important;
+      gap: 8px !important;
+      padding: 10px !important;
+    }
+
+    .brand-text {
+      font-size: 14px !important;
+    }
+
+    .campaign-text {
+      font-size: 12px !important;
+    }
+
+    .field-label {
+      font-size: 8px !important;
+    }
+
+    .field-value {
+      font-size: 12px !important;
+    }
+
+    .date-highlight {
+      font-size: 11px !important;
+      padding: 6px 10px !important;
+    }
+
+    .action-buttons button {
+      padding: 4px !important;
+    }
+
+    .emailCount {
+      font-size: 14px !important;
+      text-align: center !important;
+    }
+
+    /* Modal on small screens */
+    #emailModal .modal-content {
+      height: 100vh !important;
+      width: 100% !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      overflow-y: auto;
+    }
+
+    #emailModal h2 {
+      font-size: 18px !important;
+    }
+
+    /* List view on small screens */
+    .list.sticky {
+      position: relative !important;
+    }
+
+    .list-id,
+    .list-name,
+    .list-date {
+      font-size: 12px !important;
+    }
+  }
+
+  /* Touch-friendly adjustments */
+  @media (hover: none) and (pointer: coarse) {
+    .drag-handle {
+      cursor: grab;
+      width: 25px;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .drag-dots {
+      font-size: 16px !important;
+    }
+
+    button, .btn-primary {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    input[type="date"],
+    select {
+      min-height: 44px;
+    }
+
+    .card-search-input {
+      min-height: 44px;
+    }
+  }
+
+  /* Remove all focus effects globally */
+  * {
+    outline: none !important;
+  }
+
+  *:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: inherit !important;
+  }
+
+  input:focus,
+  select:focus,
+  button:focus,
+  textarea:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  }
+
+  /* Landscape mode for mobile */
+  @media (max-width: 768px) and (orientation: landscape) {
+    .control-panel {
+      flex-direction: row !important;
+      flex-wrap: wrap;
+    }
+
+    .control-panel > div {
+      width: 48%;
+    }
+
+    .created-lists {
+      height: 250px !important;
+    }
+  }
+</style>
