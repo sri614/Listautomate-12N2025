@@ -960,36 +960,49 @@
     // Run Automation Button
     document.getElementById('runBtn').addEventListener('click', async () => {
       const runBtn = document.getElementById('runBtn');
-      const originalText = runBtn.textContent;
+      const daysFilter = document.getElementById('daysFilter').value;
+      const modeFilter = document.getElementById('modeFilter').value;
 
-      try {
-        runBtn.disabled = true;
-        runBtn.textContent = 'Processing...';
-        const daysFilter = document.getElementById('daysFilter').value;
-        const modeFilter = document.getElementById('modeFilter').value;
-
-        const response = await fetch('/api/create-lists', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ daysFilter, modeFilter })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error(`No campaigns found for:<br>• Date: ${daysFilter.replace('t+', 'T+')}<br>• Mode: ${modeFilter}`);
+      // Show confirmation dialog first
+      showConfirm(
+        `Are you sure you want to run the automation for:<br><br>• Date Filter: <strong>${daysFilter.replace('t+', 'T+').toUpperCase()}</strong><br>• Mode: <strong>${modeFilter}</strong><br><br>This will create lists based on the selected filters.`,
+        async (confirmed) => {
+          if (!confirmed) {
+            return;
           }
-          throw new Error(result.error || 'Failed to create lists');
-        }
 
-        showDialog(`Successfully processed <strong>${result.count}</strong> campaigns matching:<br>• Date: <strong>${daysFilter.replace('t+', 'T+')}</strong><br>• Mode: <strong>${modeFilter}</strong>`, 'success', 'Automation Complete');
-      } catch (error) {
-        showDialog(error.message, 'error', 'Automation Failed');
-      } finally {
-        runBtn.disabled = false;
-        runBtn.textContent = originalText;
-      }
+          // Proceed with automation if confirmed
+          const originalText = runBtn.textContent;
+
+          try {
+            runBtn.disabled = true;
+            runBtn.textContent = 'Processing...';
+
+            const response = await fetch('/api/create-lists', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ daysFilter, modeFilter })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+              if (response.status === 404) {
+                throw new Error(`No campaigns found for:<br>• Date: ${daysFilter.replace('t+', 'T+')}<br>• Mode: ${modeFilter}`);
+              }
+              throw new Error(result.error || 'Failed to create lists');
+            }
+
+            showDialog(`Successfully processed <strong>${result.count}</strong> campaigns matching:<br>• Date: <strong>${daysFilter.replace('t+', 'T+')}</strong><br>• Mode: <strong>${modeFilter}</strong>`, 'success', 'Automation Complete');
+          } catch (error) {
+            showDialog(error.message, 'error', 'Automation Failed');
+          } finally {
+            runBtn.disabled = false;
+            runBtn.textContent = originalText;
+          }
+        },
+        'Confirm Automation'
+      );
     });
 
     // Search functionality
