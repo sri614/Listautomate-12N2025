@@ -5,12 +5,12 @@ const CreatedList = require('../models/list');
 const RETENTION_DAYS = 31;
 
 // Schedule configuration - Run daily at 2 AM
-const CLEANUP_HOUR = 2; // 2 AM
-const CLEANUP_MINUTE = 0; // On the hour
+const cleanup_HOUR = 2; // 2 AM
+const cleanup_MINUTE = 0; // On the hour
 const CHECK_INTERVAL_MS = 60 * 1000; // Check every minute
 
 let schedulerInterval = null;
-let lastCleanupDate = null;
+let lastcleanupDate = null;
 
 /**
  * Calculate the cutoff date for data retention
@@ -84,7 +84,7 @@ async function cleanupOldCreatedLists() {
  * Run complete data retention cleanup for both emails and lists
  * @returns {Promise<Object>} Combined results from all cleanup operations
  */
-async function runDataRetentionCleanup() {
+async function runDataRetentioncleanup() {
   console.log(`[Data Retention] Starting cleanup - deleting data older than ${RETENTION_DAYS} days`);
 
   const results = {
@@ -94,7 +94,7 @@ async function runDataRetentionCleanup() {
     createdLists: await cleanupOldCreatedLists()
   };
 
-  console.log('[Data Retention] Cleanup completed:', {
+  console.log('[Data Retention] cleanup completed:', {
     clonedEmailsDeleted: results.clonedEmails.deletedCount,
     createdListsDeleted: results.createdLists.deletedCount,
     totalDeleted: results.clonedEmails.deletedCount + results.createdLists.deletedCount
@@ -107,17 +107,17 @@ async function runDataRetentionCleanup() {
  * Check if it's time to run cleanup (daily at 2 AM)
  * @returns {boolean} True if cleanup should run now
  */
-function shouldRunCleanup() {
+function shouldRuncleanup() {
   const now = new Date();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
   const currentDate = now.toDateString();
 
   // Check if we're at the scheduled time
-  const isScheduledTime = currentHour === CLEANUP_HOUR && currentMinute === CLEANUP_MINUTE;
+  const isScheduledTime = currentHour === cleanup_HOUR && currentMinute === cleanup_MINUTE;
 
   // Check if we haven't already run today
-  const hasNotRunToday = lastCleanupDate !== currentDate;
+  const hasNotRunToday = lastcleanupDate !== currentDate;
 
   return isScheduledTime && hasNotRunToday;
 }
@@ -126,7 +126,7 @@ function shouldRunCleanup() {
  * Initialize automatic daily data retention cleanup
  * Runs every day at 2 AM automatically
  */
-function initializeAutoCleanup() {
+function initializeAutocleanup() {
   if (schedulerInterval) {
     console.log('[Data Retention] Scheduler already running');
     return;
@@ -136,33 +136,33 @@ function initializeAutoCleanup() {
   console.log('🗑️  DATA RETENTION SERVICE - INITIALIZED');
   console.log('═══════════════════════════════════════════════════════════');
   console.log(`📅 Retention Policy: Keep only last ${RETENTION_DAYS} days of data`);
-  console.log(`⏰ Schedule: Daily at ${CLEANUP_HOUR.toString().padStart(2, '0')}:${CLEANUP_MINUTE.toString().padStart(2, '0')} AM`);
+  console.log(`⏰ Schedule: Daily at ${cleanup_HOUR.toString().padStart(2, '0')}:${cleanup_MINUTE.toString().padStart(2, '0')} AM`);
   console.log(`🔄 Status: Automatic cleanup is ENABLED`);
   console.log('═══════════════════════════════════════════════════════════\n');
 
   // Check every minute if it's time to run cleanup
   schedulerInterval = setInterval(async () => {
-    if (shouldRunCleanup()) {
+    if (shouldRuncleanup()) {
       const now = new Date();
-      lastCleanupDate = now.toDateString();
+      lastcleanupDate = now.toDateString();
 
       console.log('\n═══════════════════════════════════════════════════════════');
-      console.log(`🕐 SCHEDULED CLEANUP STARTED - ${now.toISOString()}`);
+      console.log(`🕐 SCHEDULED cleanup STARTED - ${now.toISOString()}`);
       console.log('═══════════════════════════════════════════════════════════');
 
       try {
-        const results = await runDataRetentionCleanup();
+        const results = await runDataRetentioncleanup();
 
         console.log('\n═══════════════════════════════════════════════════════════');
-        console.log('✅ SCHEDULED CLEANUP COMPLETED');
+        console.log('✅ SCHEDULED cleanup COMPLETED');
         console.log('═══════════════════════════════════════════════════════════');
         console.log(`📧 Cloned Emails Deleted: ${results.clonedEmails.deletedCount}`);
         console.log(`📋 Created Lists Deleted: ${results.createdLists.deletedCount}`);
         console.log(`📊 Total Records Deleted: ${results.clonedEmails.deletedCount + results.createdLists.deletedCount}`);
-        console.log(`📅 Next Cleanup: Tomorrow at ${CLEANUP_HOUR.toString().padStart(2, '0')}:${CLEANUP_MINUTE.toString().padStart(2, '0')} AM`);
+        console.log(`📅 Next cleanup: Tomorrow at ${cleanup_HOUR.toString().padStart(2, '0')}:${cleanup_MINUTE.toString().padStart(2, '0')} AM`);
         console.log('═══════════════════════════════════════════════════════════\n');
       } catch (error) {
-        console.error('\n❌ SCHEDULED CLEANUP FAILED:', error.message);
+        console.error('\n❌ SCHEDULED cleanup FAILED:', error.message);
         console.error('Will retry tomorrow at scheduled time\n');
       }
     }
@@ -174,25 +174,25 @@ function initializeAutoCleanup() {
     const currentDate = now.toDateString();
 
     // Only run if we haven't run today yet
-    if (lastCleanupDate !== currentDate) {
+    if (lastcleanupDate !== currentDate) {
       console.log('\n═══════════════════════════════════════════════════════════');
-      console.log('🚀 INITIAL CLEANUP STARTED (First run after server start)');
+      console.log('🚀 INITIAL cleanup STARTED (First run after server start)');
       console.log('═══════════════════════════════════════════════════════════');
 
       try {
-        lastCleanupDate = currentDate;
-        const results = await runDataRetentionCleanup();
+        lastcleanupDate = currentDate;
+        const results = await runDataRetentioncleanup();
 
         console.log('\n═══════════════════════════════════════════════════════════');
-        console.log('✅ INITIAL CLEANUP COMPLETED');
+        console.log('✅ INITIAL cleanup COMPLETED');
         console.log('═══════════════════════════════════════════════════════════');
         console.log(`📧 Cloned Emails Deleted: ${results.clonedEmails.deletedCount}`);
         console.log(`📋 Created Lists Deleted: ${results.createdLists.deletedCount}`);
         console.log(`📊 Total Records Deleted: ${results.clonedEmails.deletedCount + results.createdLists.deletedCount}`);
-        console.log(`📅 Next Cleanup: Tomorrow at ${CLEANUP_HOUR.toString().padStart(2, '0')}:${CLEANUP_MINUTE.toString().padStart(2, '0')} AM`);
+        console.log(`📅 Next cleanup: Tomorrow at ${cleanup_HOUR.toString().padStart(2, '0')}:${cleanup_MINUTE.toString().padStart(2, '0')} AM`);
         console.log('═══════════════════════════════════════════════════════════\n');
       } catch (error) {
-        console.error('\n❌ INITIAL CLEANUP FAILED:', error.message);
+        console.error('\n❌ INITIAL cleanup FAILED:', error.message);
       }
     }
   }, 5000); // Wait 5 seconds after server starts
@@ -201,7 +201,7 @@ function initializeAutoCleanup() {
 /**
  * Stop the automatic cleanup scheduler
  */
-function stopAutoCleanup() {
+function stopAutocleanup() {
   if (schedulerInterval) {
     clearInterval(schedulerInterval);
     schedulerInterval = null;
@@ -210,11 +210,11 @@ function stopAutoCleanup() {
 }
 
 module.exports = {
-  runDataRetentionCleanup,
+  runDataRetentioncleanup,
   cleanupOldClonedEmails,
   cleanupOldCreatedLists,
   getRetentionCutoffDate,
-  initializeAutoCleanup,
-  stopAutoCleanup,
+  initializeAutocleanup,
+  stopAutocleanup,
   RETENTION_DAYS
 };

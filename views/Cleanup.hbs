@@ -1,0 +1,426 @@
+<div class="dashboard">
+  
+
+  <div class="flex" style="gap: 30px;">
+    <!-- Emails Card -->
+    <div class="card" style="width: calc(50% - 15px);">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h2 style="margin: 0; color: #5865F2;">📧 Emails</h2>
+          <div style="display: inline-block; background: #5865F2; color: white; padding: 4px 12px; border-radius: 15px; font-size: 14px; margin-top: 8px;">
+            <span id="emailCount">0</span> Emails
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 15px;">
+        <label for="emailSearch" style="display: block; margin-bottom: 8px; font-weight: 500;">Search emails:</label>
+        <input type="text" id="emailSearch" placeholder="Search by email name, ID, or date..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
+      </div>
+
+      <div id="emailList" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #eee; border-radius: 5px; padding: 10px;">
+        <div style="text-align: center; padding: 40px; color: #999;">
+          No emails found
+        </div>
+      </div>
+
+      <button id="deleteEmailsBtn" class="delete-btn" style="width: 100%; padding: 12px; background: #ED4245; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <span>🗑️</span>
+        <span>Delete Selected Emails</span>
+      </button>
+    </div>
+
+    <!-- Lists Card -->
+    <div class="card" style="width: calc(50% - 15px);">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h2 style="margin: 0; color: #57F287;">📋 Lists</h2>
+          <div style="display: inline-block; background: #57F287; color: white; padding: 4px 12px; border-radius: 15px; font-size: 14px; margin-top: 8px;">
+            <span id="listCount">0</span> Lists
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 15px;">
+        <label for="listSearch" style="display: block; margin-bottom: 8px; font-weight: 500;">Search lists:</label>
+        <input type="text" id="listSearch" placeholder="Search by list name..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
+      </div>
+
+      <div id="listList" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #eee; border-radius: 5px; padding: 10px;">
+        <div style="text-align: center; padding: 40px; color: #999;">
+          No lists found
+        </div>
+      </div>
+
+      <button id="deleteListsBtn" class="delete-btn" style="width: 100%; padding: 12px; background: #ED4245; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <span>🗑️</span>
+        <span>Delete Selected Lists</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+  <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0; color: #ED4245;">⚠️ Confirm Deletion</h3>
+    <p id="confirmMessage" style="margin: 20px 0; font-size: 16px;"></p>
+    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px;">
+      <button id="cancelBtn" style="padding: 10px 20px; background: #ccc; color: #333; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500;">
+        Cancel
+      </button>
+      <button id="confirmBtn" style="padding: 10px 20px; background: #ED4245; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500;">
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Override global card hover effects for cleanup page */
+.card {
+  transition: none !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+.card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.card:active {
+  transform: none !important;
+}
+
+.delete-btn:hover {
+  background: #c93538 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.delete-btn:active {
+  transform: translateY(0);
+}
+
+.email-item, .list-item {
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  transition: none;
+}
+
+.email-item.selected {
+  background: #e8eaff !important;
+  border-color: #5865F2 !important;
+}
+
+.list-item.selected {
+  background: #e3f9e5 !important;
+  border-color: #57F287 !important;
+}
+
+.item-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.item-details {
+  flex: 1;
+  cursor: pointer;
+}
+
+.item-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #333;
+  word-break: break-word;
+}
+
+.item-meta {
+  font-size: 12px;
+  color: #666;
+}
+
+.item-date {
+  font-size: 12px;
+  color: #999;
+  flex-shrink: 0;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let emails = [];
+  let lists = [];
+  let filteredEmails = [];
+  let filteredLists = [];
+  let deleteType = null;
+  let selectedItems = [];
+
+  // Fetch emails and lists
+  async function loadData() {
+    try {
+      // Fetch emails
+      const emailResponse = await fetch('/api/emails');
+      if (emailResponse.ok) {
+        emails = await emailResponse.json();
+        filteredEmails = emails;
+        renderEmails(filteredEmails);
+      }
+
+      // Fetch lists
+      const listResponse = await fetch('/api/lists');
+      if (listResponse.ok) {
+        lists = await listResponse.json();
+        filteredLists = lists;
+        renderLists(filteredLists);
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
+  }
+
+  function renderEmails(emailsToRender) {
+    const emailList = document.getElementById('emailList');
+    const emailCount = document.getElementById('emailCount');
+
+    emailCount.textContent = emailsToRender.length;
+
+    if (emailsToRender.length === 0) {
+      emailList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">No emails found</div>';
+      return;
+    }
+
+    emailList.innerHTML = emailsToRender.map(email => {
+      const scheduledDate = email.scheduledTime ? new Date(email.scheduledTime).toLocaleString() : 'N/A';
+      const statusBadge = email.status === 'scheduled' ? '🕒' : email.status === 'sent' ? '✅' : '❌';
+
+      return `
+        <div class="email-item" data-id="${email.id}" data-name="${email.name || ''}" data-emailid="${email.clonedEmailId || ''}">
+          <input type="checkbox" class="item-checkbox email-checkbox" data-id="${email.id}">
+          <div class="item-details" onclick="toggleEmailSelection(this)">
+            <div class="item-title">${email.name || 'No Name'}</div>
+            <div class="item-meta">ID: ${email.clonedEmailId || 'N/A'} | Scheduled: ${scheduledDate} | Status: ${statusBadge} ${email.status || 'N/A'}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Add checkbox change handlers
+    document.querySelectorAll('.email-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        this.closest('.email-item').classList.toggle('selected', this.checked);
+      });
+    });
+  }
+
+  function renderLists(listsToRender) {
+    const listList = document.getElementById('listList');
+    const listCount = document.getElementById('listCount');
+
+    listCount.textContent = listsToRender.length;
+
+    if (listsToRender.length === 0) {
+      listList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">No lists found</div>';
+      return;
+    }
+
+    listList.innerHTML = listsToRender.map(list => `
+      <div class="list-item" data-id="${list.id}" data-name="${list.name || ''}" data-listid="${list.listId || ''}">
+        <input type="checkbox" class="item-checkbox list-checkbox" data-id="${list.id}" data-listid="${list.listId || ''}">
+        <div class="item-details" onclick="toggleListSelection(this)">
+          <div class="item-title">${list.name || 'Unnamed List'}</div>
+          <div class="item-meta">List ID: ${list.listId || 'N/A'} | Created: ${list.date || 'N/A'}</div>
+        </div>
+      </div>
+    `).join('');
+
+    // Add checkbox change handlers
+    document.querySelectorAll('.list-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        this.closest('.list-item').classList.toggle('selected', this.checked);
+      });
+    });
+  }
+
+  // Toggle selection functions
+  window.toggleEmailSelection = function(element) {
+    const item = element.closest('.email-item');
+    const checkbox = item.querySelector('.item-checkbox');
+    checkbox.checked = !checkbox.checked;
+    item.classList.toggle('selected', checkbox.checked);
+  };
+
+  window.toggleListSelection = function(element) {
+    const item = element.closest('.list-item');
+    const checkbox = item.querySelector('.item-checkbox');
+    checkbox.checked = !checkbox.checked;
+    item.classList.toggle('selected', checkbox.checked);
+  };
+
+  // Search functionality for emails
+  document.getElementById('emailSearch').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    filterEmails();
+  });
+
+  // Search functionality for lists
+  document.getElementById('listSearch').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    filterLists();
+  });
+
+  function filterEmails() {
+    const searchTerm = document.getElementById('emailSearch').value.toLowerCase();
+
+    filteredEmails = emails.filter(email => {
+      const matchesSearch = !searchTerm ||
+        (email.name && email.name.toLowerCase().includes(searchTerm)) ||
+        (email.clonedEmailId && email.clonedEmailId.toString().toLowerCase().includes(searchTerm)) ||
+        (email.status && email.status.toLowerCase().includes(searchTerm));
+
+      return matchesSearch;
+    });
+
+    renderEmails(filteredEmails);
+  }
+
+  function filterLists() {
+    const searchTerm = document.getElementById('listSearch').value.toLowerCase();
+
+    filteredLists = lists.filter(list => {
+      const matchesSearch = !searchTerm ||
+        (list.name && list.name.toLowerCase().includes(searchTerm));
+
+      return matchesSearch;
+    });
+
+    renderLists(filteredLists);
+  }
+
+  // Delete emails button
+  document.getElementById('deleteEmailsBtn').addEventListener('click', function() {
+    const selectedCheckboxes = document.querySelectorAll('.email-checkbox:checked');
+
+    if (selectedCheckboxes.length === 0) {
+      alert('Please select at least one email to delete');
+      return;
+    }
+
+    selectedItems = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
+    deleteType = 'emails';
+
+    const message = `Are you sure you want to delete ${selectedItems.length} email(s)? This action cannot be undone.`;
+    showConfirmModal(message);
+  });
+
+  // Delete lists button
+  document.getElementById('deleteListsBtn').addEventListener('click', function() {
+    const selectedCheckboxes = document.querySelectorAll('.list-checkbox:checked');
+
+    if (selectedCheckboxes.length === 0) {
+      alert('Please select at least one list to delete');
+      return;
+    }
+
+    selectedItems = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
+    deleteType = 'lists';
+
+    const message = `Are you sure you want to delete ${selectedItems.length} list(s)? This action cannot be undone.`;
+    showConfirmModal(message);
+  });
+
+  // Confirmation modal
+  function showConfirmModal(message) {
+    const modal = document.getElementById('confirmModal');
+    const confirmMessage = document.getElementById('confirmMessage');
+
+    confirmMessage.textContent = message;
+    modal.style.display = 'flex';
+  }
+
+  function hideConfirmModal() {
+    const modal = document.getElementById('confirmModal');
+    modal.style.display = 'none';
+  }
+
+  // Cancel button
+  document.getElementById('cancelBtn').addEventListener('click', function() {
+    hideConfirmModal();
+    selectedItems = [];
+    deleteType = null;
+  });
+
+  // Confirm delete button
+  document.getElementById('confirmBtn').addEventListener('click', async function() {
+    if (!deleteType || selectedItems.length === 0) {
+      hideConfirmModal();
+      return;
+    }
+
+    const confirmBtn = this;
+    const originalText = confirmBtn.textContent;
+
+    try {
+      // Show loading state
+      confirmBtn.textContent = 'Deleting...';
+      confirmBtn.disabled = true;
+      confirmBtn.style.opacity = '0.6';
+
+      const endpoint = deleteType === 'emails' ? '/api/emails/delete' : '/api/lists/delete';
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ids: selectedItems })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        hideConfirmModal();
+
+        // Show success message
+        const successMsg = `Successfully deleted ${result.deletedCount} ${deleteType}`;
+        alert(successMsg);
+
+        // Reload data from server to ensure consistency
+        await loadData();
+
+        selectedItems = [];
+        deleteType = null;
+      } else {
+        alert(`Error deleting ${deleteType}: ${result.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting items:', error);
+      alert(`Error deleting ${deleteType}: ${error.message}`);
+    } finally {
+      // Reset button state
+      confirmBtn.textContent = originalText;
+      confirmBtn.disabled = false;
+      confirmBtn.style.opacity = '1';
+    }
+  });
+
+  // Close modal on background click
+  document.getElementById('confirmModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      hideConfirmModal();
+    }
+  });
+
+  // Load initial data
+  loadData();
+});
+</script>

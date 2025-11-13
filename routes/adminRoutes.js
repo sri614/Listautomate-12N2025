@@ -3,7 +3,8 @@ const router = express.Router();
 const axios = require('axios');
 const Segmentation = require("../models/segmentation");
 const CreatedList = require("../models/list");
-const { runDataRetentionCleanup, getRetentionCutoffDate, RETENTION_DAYS } = require("../service/dataRetention");
+const ClonedEmail = require("../models/clonedEmail");
+const { runDataRetentioncleanup, getRetentionCutoffDate, RETENTION_DAYS } = require("../service/dataRetention");
 
 // HubSpot configuration
 const HUBSPOT_ACCESS_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN;
@@ -206,15 +207,15 @@ router.get('/docs', ensureAuthenticated, async (req, res) => {
   }
 });
 
-// ✔️ REPORT PAGE (protected)
-router.get('/report', ensureAuthenticated, async (req, res) => {
+// ✔️ cleanup PAGE (protected)
+router.get('/cleanup', ensureAuthenticated, async (req, res) => {
   try {
-    res.render("report", {
-      pageTitle: "Report",
-      activePage: "report",
+    res.render("cleanup", {
+      pageTitle: "cleanup",
+      activePage: "cleanup",
     });
   } catch (err) {
-    console.error("Report route failed:", err);
+    console.error("cleanup route failed:", err);
     res.status(500).json({ success: false });
   }
 });
@@ -224,7 +225,7 @@ router.post('/data-retention/cleanup', ensureAuthenticated, async (req, res) => 
   try {
     console.log(`[Data Retention] Manual cleanup triggered by user: ${req.session.user}`);
 
-    const results = await runDataRetentionCleanup();
+    const results = await runDataRetentioncleanup();
 
     res.json({
       success: true,
@@ -278,6 +279,175 @@ router.get('/data-retention/status', ensureAuthenticated, async (req, res) => {
       success: false,
       error: err.message
     });
+  }
+});
+
+// ✔️ API - Get all emails for cleanup page (protected)
+router.get('/api/emails', ensureAuthenticated, async (req, res) => {
+  try {
+    // Fetch cloned emails instead of segmentations
+    const clonedEmails = await ClonedEmail.find().sort({ createdAt: -1 }).lean();
+
+    const formattedEmails = clonedEmails.map(email => ({
+      id: email._id,
+      clonedEmailId: email.clonedEmailId,
+      name: email.clonedEmailName || 'No Name',
+      scheduledTime: email.scheduledTime,
+      status: email.status,
+      date: email.createdAt ? new Date(email.createdAt).toLocaleDateString() : '',
+      createdAt: email.createdAt
+    }));
+
+    res.json(formattedEmails);
+  } catch (err) {
+    console.error("Error fetching emails:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch emails" });
+  }
+});
+
+// ✔️ API - Get all lists for cleanup page (protected)
+router.get('/api/lists', ensureAuthenticated, async (req, res) => {
+  try {
+    const lists = await CreatedList.find().sort({ createdDate: -1 }).lean();
+
+    const formattedLists = lists.map(list => ({
+      id: list._id,
+      name: list.name || 'Unnamed List',
+      listId: list.listId,
+      date: list.createdDate ? new Date(list.createdDate).toLocaleDateString() : '',
+      createdDate: list.createdDate
+    }));
+
+    res.json(formattedLists);
+  } catch (err) {
+    console.error("Error fetching lists:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch lists" });
+  }
+});
+
+// ✔️ API - Delete multiple emails (protected)
+router.post('/api/emails/delete', ensureAuthenticated, async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: "No email IDs provided" });
+    }
+
+    console.log(`\n[Email Deletion] Starting deletion of ${ids.length} cloned email(s) by user: ${req.session.user}`);
+
+    let deletedCount = 0;
+    let errors = [];
+
+    for (const id of ids) {
+      try {
+        // Get the cloned email from MongoDB
+        const clonedEmail = await ClonedEmail.findById(id);
+
+        if (clonedEmail) {
+          // Delete from HubSpot first
+          try {
+            await axios.delete(
+              `https://api.hubapi.com/marketing/v3/emails/${clonedEmail.clonedEmailId}`,
+              { headers: hubspotHeaders }
+            );
+            console.log(`  ✓ Deleted cloned email from HubSpot: ${clonedEmail.clonedEmailId} (${clonedEmail.clonedEmailName})`);
+          } catch (hubspotErr) {
+            console.error(`  ⚠️  Failed to delete email ${clonedEmail.clonedEmailId} from HubSpot:`, hubspotErr.response?.status);
+            // Continue with MongoDB deletion even if HubSpot deletion fails
+          }
+
+          // Delete from MongoDB
+          await ClonedEmail.findByIdAndDelete(id);
+          console.log(`  ✓ Deleted cloned email from MongoDB: ${id}`);
+          deletedCount++;
+        } else {
+          console.log(`  ⚠️  Cloned email not found: ${id}`);
+          errors.push({ id, error: "Cloned email not found" });
+        }
+      } catch (err) {
+        console.error(`  ❌ Error deleting email ${id}:`, err.message);
+        errors.push({ id, error: err.message });
+      }
+
+      // Add delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
+    console.log(`[Email Deletion] Completed: ${deletedCount}/${ids.length} deleted successfully\n`);
+
+    res.json({
+      success: true,
+      message: `Successfully deleted ${deletedCount} email(s)`,
+      deletedCount: deletedCount,
+      errors: errors.length > 0 ? errors : undefined
+    });
+  } catch (err) {
+    console.error("Error deleting emails:", err);
+    res.status(500).json({ success: false, message: "Failed to delete emails", error: err.message });
+  }
+});
+
+// ✔️ API - Delete multiple lists (protected)
+router.post('/api/lists/delete', ensureAuthenticated, async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: "No list IDs provided" });
+    }
+
+    console.log(`\n[List Deletion] Starting deletion of ${ids.length} list(s) by user: ${req.session.user}`);
+
+    let deletedCount = 0;
+    let errors = [];
+
+    for (const id of ids) {
+      try {
+        // Get the list from MongoDB
+        const list = await CreatedList.findById(id);
+
+        if (list && list.listId) {
+          // Delete from HubSpot first
+          try {
+            await axios.delete(
+              `https://api.hubapi.com/crm/v3/lists/${list.listId}`,
+              { headers: hubspotHeaders }
+            );
+            console.log(`  ✓ Deleted list from HubSpot: ${list.listId} (${list.name})`);
+          } catch (hubspotErr) {
+            console.error(`  ⚠️  Failed to delete list ${list.listId} from HubSpot:`, hubspotErr.response?.status);
+            // Continue with MongoDB deletion even if HubSpot deletion fails
+          }
+
+          // Delete from MongoDB
+          await CreatedList.findByIdAndDelete(id);
+          console.log(`  ✓ Deleted list from MongoDB: ${id}`);
+          deletedCount++;
+        } else {
+          console.log(`  ⚠️  List not found or missing listId: ${id}`);
+          errors.push({ id, error: "List not found or missing listId" });
+        }
+      } catch (err) {
+        console.error(`  ❌ Error deleting list ${id}:`, err.message);
+        errors.push({ id, error: err.message });
+      }
+
+      // Add delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
+    console.log(`[List Deletion] Completed: ${deletedCount}/${ids.length} deleted successfully\n`);
+
+    res.json({
+      success: true,
+      message: `Successfully deleted ${deletedCount} list(s)`,
+      deletedCount: deletedCount,
+      errors: errors.length > 0 ? errors : undefined
+    });
+  } catch (err) {
+    console.error("Error deleting lists:", err);
+    res.status(500).json({ success: false, message: "Failed to delete lists", error: err.message });
   }
 });
 

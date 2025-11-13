@@ -11,7 +11,7 @@ const authRoutes = require('./routes/auth');
 const loginTrackingRoutes = require('./routes/loginTracking');
 
 const app = express();
-const { initializeAutoCleanup } = require('./service/dataRetention');
+const { initializeAutocleanup } = require('./service/dataRetention');
 
 // Middleware
 app.use(express.json());
@@ -71,5 +71,5 @@ app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}/`);
 
     // 🗑️ Initialize automatic data retention cleanup (runs daily at 2 AM)
-    initializeAutoCleanup();
+    initializeAutocleanup();
 });
