@@ -1,37 +1,9 @@
 <div class="dashboard">
-  
+
 
   <div class="flex" style="gap: 30px;">
-    <!-- Emails Card -->
-    <div class="card" style="width: calc(50% - 15px);">
-      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <div>
-          <h2 style="margin: 0; color: #5865F2;">📧 Emails</h2>
-          <div style="display: inline-block; background: #5865F2; color: white; padding: 4px 12px; border-radius: 15px; font-size: 14px; margin-top: 8px;">
-            <span id="emailCount">0</span> Emails
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-bottom: 15px;">
-        <label for="emailSearch" style="display: block; margin-bottom: 8px; font-weight: 500;">Search emails:</label>
-        <input type="text" id="emailSearch" placeholder="Search by email name, ID, or date..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
-      </div>
-
-      <div id="emailList" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #eee; border-radius: 5px; padding: 10px;">
-        <div style="text-align: center; padding: 40px; color: #999;">
-          No emails found
-        </div>
-      </div>
-
-      <button id="deleteEmailsBtn" class="delete-btn" style="width: 100%; padding: 12px; background: #ED4245; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <span>🗑️</span>
-        <span>Delete Selected Emails</span>
-      </button>
-    </div>
-
     <!-- Lists Card -->
-    <div class="card" style="width: calc(50% - 15px);">
+    <div class="card" style="width: 100%; max-width: 1200px; margin: 0 auto;">
       <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div>
           <h2 style="margin: 0; color: #57F287;">📋 Lists</h2>
@@ -103,7 +75,7 @@
   transform: translateY(0);
 }
 
-.email-item, .list-item {
+.list-item {
   padding: 12px;
   margin-bottom: 8px;
   border: 1px solid #eee;
@@ -113,11 +85,6 @@
   gap: 10px;
   background: white;
   transition: none;
-}
-
-.email-item.selected {
-  background: #e8eaff !important;
-  border-color: #5865F2 !important;
 }
 
 .list-item.selected {
@@ -158,24 +125,14 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  let emails = [];
   let lists = [];
-  let filteredEmails = [];
   let filteredLists = [];
   let deleteType = null;
   let selectedItems = [];
 
-  // Fetch emails and lists
+  // Fetch lists
   async function loadData() {
     try {
-      // Fetch emails
-      const emailResponse = await fetch('/api/emails');
-      if (emailResponse.ok) {
-        emails = await emailResponse.json();
-        filteredEmails = emails;
-        renderEmails(filteredEmails);
-      }
-
       // Fetch lists
       const listResponse = await fetch('/api/lists');
       if (listResponse.ok) {
@@ -186,40 +143,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (error) {
       console.error('Error loading data:', error);
     }
-  }
-
-  function renderEmails(emailsToRender) {
-    const emailList = document.getElementById('emailList');
-    const emailCount = document.getElementById('emailCount');
-
-    emailCount.textContent = emailsToRender.length;
-
-    if (emailsToRender.length === 0) {
-      emailList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">No emails found</div>';
-      return;
-    }
-
-    emailList.innerHTML = emailsToRender.map(email => {
-      const scheduledDate = email.scheduledTime ? new Date(email.scheduledTime).toLocaleString() : 'N/A';
-      const statusBadge = email.status === 'scheduled' ? '🕒' : email.status === 'sent' ? '✅' : '❌';
-
-      return `
-        <div class="email-item" data-id="${email.id}" data-name="${email.name || ''}" data-emailid="${email.clonedEmailId || ''}">
-          <input type="checkbox" class="item-checkbox email-checkbox" data-id="${email.id}">
-          <div class="item-details" onclick="toggleEmailSelection(this)">
-            <div class="item-title">${email.name || 'No Name'}</div>
-            <div class="item-meta">ID: ${email.clonedEmailId || 'N/A'} | Scheduled: ${scheduledDate} | Status: ${statusBadge} ${email.status || 'N/A'}</div>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    // Add checkbox change handlers
-    document.querySelectorAll('.email-checkbox').forEach(checkbox => {
-      checkbox.addEventListener('change', function() {
-        this.closest('.email-item').classList.toggle('selected', this.checked);
-      });
-    });
   }
 
   function renderLists(listsToRender) {
@@ -251,14 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Toggle selection functions
-  window.toggleEmailSelection = function(element) {
-    const item = element.closest('.email-item');
-    const checkbox = item.querySelector('.item-checkbox');
-    checkbox.checked = !checkbox.checked;
-    item.classList.toggle('selected', checkbox.checked);
-  };
-
+  // Toggle selection function
   window.toggleListSelection = function(element) {
     const item = element.closest('.list-item');
     const checkbox = item.querySelector('.item-checkbox');
@@ -266,32 +182,11 @@ document.addEventListener('DOMContentLoaded', function() {
     item.classList.toggle('selected', checkbox.checked);
   };
 
-  // Search functionality for emails
-  document.getElementById('emailSearch').addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase();
-    filterEmails();
-  });
-
   // Search functionality for lists
   document.getElementById('listSearch').addEventListener('input', function() {
     const searchTerm = this.value.toLowerCase();
     filterLists();
   });
-
-  function filterEmails() {
-    const searchTerm = document.getElementById('emailSearch').value.toLowerCase();
-
-    filteredEmails = emails.filter(email => {
-      const matchesSearch = !searchTerm ||
-        (email.name && email.name.toLowerCase().includes(searchTerm)) ||
-        (email.clonedEmailId && email.clonedEmailId.toString().toLowerCase().includes(searchTerm)) ||
-        (email.status && email.status.toLowerCase().includes(searchTerm));
-
-      return matchesSearch;
-    });
-
-    renderEmails(filteredEmails);
-  }
 
   function filterLists() {
     const searchTerm = document.getElementById('listSearch').value.toLowerCase();
@@ -305,22 +200,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     renderLists(filteredLists);
   }
-
-  // Delete emails button
-  document.getElementById('deleteEmailsBtn').addEventListener('click', function() {
-    const selectedCheckboxes = document.querySelectorAll('.email-checkbox:checked');
-
-    if (selectedCheckboxes.length === 0) {
-      alert('Please select at least one email to delete');
-      return;
-    }
-
-    selectedItems = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
-    deleteType = 'emails';
-
-    const message = `Are you sure you want to delete ${selectedItems.length} email(s)? This action cannot be undone.`;
-    showConfirmModal(message);
-  });
 
   // Delete lists button
   document.getElementById('deleteListsBtn').addEventListener('click', function() {
@@ -375,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
       confirmBtn.disabled = true;
       confirmBtn.style.opacity = '0.6';
 
-      const endpoint = deleteType === 'emails' ? '/api/emails/delete' : '/api/lists/delete';
+      const endpoint = '/api/lists/delete';
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -391,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
         hideConfirmModal();
 
         // Show success message
-        const successMsg = `Successfully deleted ${result.deletedCount} ${deleteType}`;
+        const successMsg = `Successfully deleted ${result.deletedCount} list(s)`;
         alert(successMsg);
 
         // Reload data from server to ensure consistency
@@ -400,11 +279,11 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedItems = [];
         deleteType = null;
       } else {
-        alert(`Error deleting ${deleteType}: ${result.message || 'Unknown error'}`);
+        alert(`Error deleting lists: ${result.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error deleting items:', error);
-      alert(`Error deleting ${deleteType}: ${error.message}`);
+      alert(`Error deleting lists: ${error.message}`);
     } finally {
       // Reset button state
       confirmBtn.textContent = originalText;
