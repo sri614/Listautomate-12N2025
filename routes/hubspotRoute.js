@@ -529,7 +529,7 @@ router.post('/create-lists', async (req, res) => {
     console.log(`📨 Received request to create lists | Filters → Days: ${daysFilter}, Mode: ${modeFilter}`);
 
     // Validate input parameters
-    const validDaysFilters = ['today', 't+1', 't+2', 't+3', 'all'];
+    const validDaysFilters = ['today', 't+1', 't+2', 't+3', 't+4', 't+5', 'all'];
     const validModeFilters = ['BAU', 're-engagement', 're-activation'];
     
     if (!daysFilter || !validDaysFilters.includes(daysFilter)) {
