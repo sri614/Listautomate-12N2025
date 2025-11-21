@@ -6,22 +6,28 @@
     <div class="card" style="width: 100%; max-width: 1200px; margin: 0 auto;">
       <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div>
-          <h2 style="margin: 0; color: #57F287;">📋 Lists</h2>
+          <h2 style="margin: 0; ">📋Lists</h2>
         </div>
-        <div style="display: inline-block; background: #57F287; color: white; padding: 8px 16px; border-radius: 15px; font-size: 16px; font-weight: 600; box-shadow: 0 2px 4px rgba(87, 242, 135, 0.3);">
+        <div style="display: inline-block; background: #1654a0; color: white; padding: 8px 16px; border-radius: 15px; font-size: 16px; font-weight: 600; box-shadow: 0 2px 4px rgba(87, 242, 135, 0.3);">
           <span id="listCount">0</span> Lists
         </div>
       </div>
 
       <div style="margin-bottom: 15px;">
         <label for="listSearch" style="display: block; margin-bottom: 8px; font-weight: 500;">Search lists:</label>
-        <input type="text" id="listSearch" placeholder="Search by list name..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <input type="text" id="listSearch" placeholder="Search by list name..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+          <button id="loadListSizeBtn" style="padding: 10px 20px; background: #5865F2; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+            <span>📊</span>
+            <span>Load Sizes</span>
+          </button>
+        </div>
 
         <!-- Select All Checkbox -->
         <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px; display: flex; align-items: center; gap: 8px;">
           <input type="checkbox" id="selectAllCheckbox" style="width: 18px; height: 18px; cursor: pointer;">
           <label for="selectAllCheckbox" style="cursor: pointer; font-weight: 500; margin: 0;">
-            Select All Filtered Lists (<span id="filteredCount">0</span>)
+            Select All (<span id="selectedCount">0</span> / <span id="filteredCount">0</span>)
           </label>
         </div>
       </div>
@@ -73,6 +79,22 @@
   transform: none !important;
 }
 
+#loadListSizeBtn:hover {
+  background: #4752c4 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#loadListSizeBtn:active {
+  transform: translateY(0);
+}
+
+#loadListSizeBtn:disabled {
+  background: #9ca3db !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .delete-btn:hover {
   background: #c93538 !important;
   transform: translateY(-1px);
@@ -97,7 +119,7 @@
 
 .list-item.selected {
   background: #e3f9e5 !important;
-  border-color: #57F287 !important;
+  border-color: #1654a0 !important;
 }
 
 .item-checkbox {
@@ -133,15 +155,15 @@
 .list-size-badge {
   display: flex;
   align-items: center;
-  background: #e3f9e5;
-  color: #57F287;
+  background: #1654a0;
+  color: #fff;
   padding: 6px 12px;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
   margin-left: auto;
   flex-shrink: 0;
-  border: 1px solid #57F287;
+  border: 1px solid #1654a0;
 }
 </style>
 
@@ -213,6 +235,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
     const visibleCheckboxes = document.querySelectorAll('.list-checkbox');
     const checkedCheckboxes = document.querySelectorAll('.list-checkbox:checked');
+    const selectedCount = document.getElementById('selectedCount');
+
+    // Update selected count display
+    if (selectedCount) {
+      selectedCount.textContent = checkedCheckboxes.length;
+    }
 
     if (selectAllCheckbox && visibleCheckboxes.length > 0) {
       selectAllCheckbox.checked = visibleCheckboxes.length === checkedCheckboxes.length;
@@ -229,6 +257,9 @@ document.addEventListener('DOMContentLoaded', function() {
       checkbox.checked = selectAllCheckbox.checked;
       checkbox.closest('.list-item').classList.toggle('selected', checkbox.checked);
     });
+
+    // Update the selected count display
+    updateSelectAllState();
   }
 
   // Toggle selection function
@@ -237,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkbox = item.querySelector('.item-checkbox');
     checkbox.checked = !checkbox.checked;
     item.classList.toggle('selected', checkbox.checked);
+    updateSelectAllState(); // Update the count when clicking the card
   };
 
   // Search functionality for lists
@@ -316,6 +348,72 @@ document.addEventListener('DOMContentLoaded', function() {
 
     renderLists(filteredLists);
   }
+
+  // Load list sizes button
+  document.getElementById('loadListSizeBtn').addEventListener('click', async function() {
+    const btn = this;
+    const originalText = btn.innerHTML;
+
+    // Get list IDs from currently filtered/visible lists
+    const listIdsToFetch = filteredLists.map(list => list.listId).filter(id => id);
+
+    if (listIdsToFetch.length === 0) {
+      alert('No lists to load sizes for');
+      return;
+    }
+
+    try {
+      // Disable button and show loading state
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span><span>Loading sizes...</span>';
+
+      // Fetch sizes from API
+      const response = await fetch('/api/lists/sizes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ listIds: listIdsToFetch })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Update the lists array with fetched sizes
+        lists.forEach(list => {
+          if (result.sizes[list.listId] !== undefined) {
+            list.size = result.sizes[list.listId];
+          }
+        });
+
+        // Update filteredLists as well
+        filteredLists.forEach(list => {
+          if (result.sizes[list.listId] !== undefined) {
+            list.size = result.sizes[list.listId];
+          }
+        });
+
+        // Re-render to show updated sizes
+        renderLists(filteredLists);
+
+        // Show success message
+        btn.innerHTML = '<span>✓</span><span>Sizes Loaded!</span>';
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }, 2000);
+      } else {
+        alert(`Error loading sizes: ${result.message || 'Unknown error'}`);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    } catch (error) {
+      console.error('Error loading list sizes:', error);
+      alert(`Error loading sizes: ${error.message}`);
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+  });
 
   // Delete lists button
   document.getElementById('deleteListsBtn').addEventListener('click', function() {

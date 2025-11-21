@@ -315,13 +315,77 @@ router.get('/api/lists', ensureAuthenticated, async (req, res) => {
       name: list.name || 'Unnamed List',
       listId: list.listId,
       date: list.createdDate ? new Date(list.createdDate).toLocaleDateString() : '',
-      createdDate: list.createdDate
+      createdDate: list.createdDate,
+      size: 0 // Default to 0, will be loaded on demand
     }));
 
     res.json(formattedLists);
   } catch (err) {
     console.error("Error fetching lists:", err);
     res.status(500).json({ success: false, message: "Failed to fetch lists" });
+  }
+});
+
+// ✔️ API - Fetch list sizes for specific lists (protected)
+router.post('/api/lists/sizes', ensureAuthenticated, async (req, res) => {
+  try {
+    const { listIds } = req.body;
+
+    if (!Array.isArray(listIds) || listIds.length === 0) {
+      return res.status(400).json({ success: false, message: "listIds array is required" });
+    }
+
+    console.log(`[List Sizes] Fetching sizes for ${listIds.length} list(s)`);
+
+    // Helper function to fetch sizes with rate limiting
+    async function fetchSizesWithRateLimit(listIds) {
+      const BATCH_SIZE = 10; // Process 10 lists at a time
+      const DELAY_MS = 1000; // Wait 1 second between batches
+      const sizes = {};
+
+      for (let i = 0; i < listIds.length; i += BATCH_SIZE) {
+        const batch = listIds.slice(i, i + BATCH_SIZE);
+
+        // Process current batch in parallel
+        const batchResults = await Promise.all(
+          batch.map(async (listId) => {
+            try {
+              const response = await axios.get(
+                `https://api.hubapi.com/crm/v3/lists/${listId}`,
+                { headers: hubspotHeaders }
+              );
+
+              const listData = response.data.list || response.data;
+              const size = listData.objectCount || listData.size || 0;
+              return { listId, size };
+            } catch (error) {
+              console.error(`  Failed to fetch size for list ${listId}:`, error.response?.status);
+              return { listId, size: 0 };
+            }
+          })
+        );
+
+        // Add batch results to sizes map
+        batchResults.forEach(({ listId, size }) => {
+          sizes[listId] = size;
+        });
+
+        // Add delay between batches (except for the last batch)
+        if (i + BATCH_SIZE < listIds.length) {
+          await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+        }
+      }
+
+      return sizes;
+    }
+
+    const sizes = await fetchSizesWithRateLimit(listIds);
+
+    console.log(`[List Sizes] Successfully fetched sizes for ${Object.keys(sizes).length} list(s)`);
+    res.json({ success: true, sizes });
+  } catch (err) {
+    console.error("Error fetching list sizes:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch list sizes" });
   }
 });
 
